@@ -73,10 +73,6 @@ if (workbox) {
         "revision": "fadb4aaf36972b544865bd31eda7949d"
     },
     {
-        "url": "madrasa_management_indexeddb.html",
-        "revision": "edd3f7cf91fe8dae74075c7c11a6f764"
-    },
-    {
         "url": "manifest.json",
         "revision": "8c8790cc26edba6e2e0dd6719861eb9a"
     },
@@ -86,7 +82,7 @@ if (workbox) {
     },
     {
         "url": "sw.js",
-        "revision": "105ec2825de518e6417d11e727fd6f51"
+        "revision": "afff1e3c3121a45e1038e25042416c5d"
     }
 ]);
 
