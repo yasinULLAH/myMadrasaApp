@@ -1,0 +1,32 @@
+# ============================
+# 🔐 SECURITY - Never push these
+# ============================
+
+# Google OAuth client secret files
+client_secret_*.json
+*client_secret*.json
+
+# Environment files
+.env
+.env.local
+.env.production
+
+# Database backups
+*.zip
+madrasa_backup.*
+*.sql
+
+# OS files
+Thumbs.db
+.DS_Store
+desktop.ini
+
+# IDE files
+.vscode/
+.idea/
+
+# Node modules (if any)
+node_modules/
+
+# PWA build tool
+*.pyw

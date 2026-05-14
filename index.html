@@ -2134,9 +2134,54 @@
 <label class="btn-outline-green" style="cursor:pointer;margin:0;"><i class="fa fa-upload"></i> ڈیٹا امپورٹ (ZIP) <input accept=".zip" onchange="importData(event)" style="display:none" type="file"/></label>
 <button class="btn-danger-soft" onclick="clearAllData()"><i class="fa fa-trash"></i> تمام ڈیٹا حذف کریں</button>
 </div>
-<div style="display:flex;gap:1rem;flex-wrap:wrap;border-top:1px solid #eee;padding-top:1rem;">
-<button class="btn-outline-green" onclick="authAndSyncToDrive()"><i class="fab fa-google"></i> گوگل ڈرائیو پر محفوظ کریں</button>
-<button class="btn-outline-green" onclick="authAndRestoreFromDrive()"><i class="fa fa-cloud-download-alt"></i> گوگل ڈرائیو سے بحال کریں</button>
+<!-- Google Drive Sync Section -->
+<div style="border-top:2px solid var(--green-light);padding-top:1.25rem;margin-top:.5rem;">
+<div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:.75rem;margin-bottom:1rem;">
+<div style="display:flex;align-items:center;gap:.6rem;">
+<div style="width:42px;height:42px;border-radius:50%;background:linear-gradient(135deg,#4285F4,#34A853,#FBBC05,#EA4335);display:flex;align-items:center;justify-content:center;">
+<i class="fab fa-google" style="color:#fff;font-size:1.1rem;"></i>
+</div>
+<div>
+<div style="font-weight:700;font-size:1.05rem;color:var(--green-dark);">گوگل ڈرائیو سنک</div>
+<div style="font-size:.78rem;color:#888;" id="gdSyncStatusText">غیر متصل</div>
+</div>
+</div>
+<div id="gdConnectionBadge" style="display:inline-flex;align-items:center;gap:.35rem;padding:.3rem .75rem;border-radius:2rem;font-size:.78rem;font-weight:600;background:#fee;color:#c0392b;">
+<i class="fa fa-circle" style="font-size:.45rem;"></i> غیر متصل
+</div>
+</div>
+<div id="gdLastBackupInfo" style="background:#f8faf8;border:1px solid #e8f0ea;border-radius:var(--radius);padding:.75rem 1rem;margin-bottom:1rem;display:none;">
+<div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:.5rem;">
+<div style="font-size:.82rem;color:#555;">
+<i class="fa fa-clock text-success me-1"></i> آخری بیک اپ: <strong id="gdLastBackupTime">—</strong>
+</div>
+<div style="font-size:.82rem;color:#555;">
+<i class="fa fa-hdd text-success me-1"></i> سائز: <span id="gdLastBackupSize">—</span>
+</div>
+</div>
+</div>
+<div style="display:flex;gap:.75rem;flex-wrap:wrap;">
+<button class="btn-primary-green" id="gdBtnBackup" onclick="authAndSyncToDrive()" style="position:relative;overflow:hidden;">
+<i class="fa fa-cloud-upload-alt" id="gdBtnBackupIcon"></i>
+<span id="gdBtnBackupText">گوگل ڈرائیو پر محفوظ کریں</span>
+</button>
+<button class="btn-outline-green" id="gdBtnRestore" onclick="authAndRestoreFromDrive()" style="position:relative;overflow:hidden;">
+<i class="fa fa-cloud-download-alt" id="gdBtnRestoreIcon"></i>
+<span id="gdBtnRestoreText">گوگل ڈرائیو سے بحال کریں</span>
+</button>
+<button class="btn-outline-green" id="gdBtnDisconnect" onclick="disconnectGoogle()" style="display:none;">
+<i class="fa fa-unlink"></i> رابطہ منقطع کریں
+</button>
+</div>
+<div id="gdProgressWrap" style="display:none;margin-top:1rem;">
+<div style="display:flex;align-items:center;gap:.5rem;margin-bottom:.4rem;">
+<i class="fa fa-spinner fa-spin text-success"></i>
+<span id="gdProgressText" style="font-size:.82rem;color:#555;">جاری ہے...</span>
+</div>
+<div style="background:#e8f0ea;border-radius:1rem;height:8px;overflow:hidden;">
+<div id="gdProgressBar" style="width:0%;height:100%;background:linear-gradient(90deg,var(--green-primary),var(--gold));border-radius:1rem;transition:width .4s ease;"></div>
+</div>
+</div>
 </div>
 </div>
 </div>
@@ -5410,105 +5455,341 @@
             showToast('info', 'حاضری نشانات تبدیل ہو گئے: ' + (currentAttSymbolMode === 'letters' ? 'ح/غ/ر' : '✓/✗/—'));
             loadMonthlyAtt();
         }
-        const CLIENT_ID = 'YOUR_GOOGLE_CLIENT_ID_HERE.apps.googleusercontent.com';
-        const SCOPES = 'https://www.googleapis.com/auth/drive.appdata';
+        // ⚠️ اہم: نیچے اپنا Google Cloud Console سے حاصل کردہ OAuth Client ID لگائیں
+        // Google Cloud Console → APIs & Services → Credentials → OAuth 2.0 Client ID
+        // Authorized JavaScript Origins میں اپنا URL شامل کریں (مثلاً http://localhost)
+        const CLIENT_ID = '323091985122-q4i8ujlddq9e3it5tsjn1rnhir69ldb7.apps.googleusercontent.com';
+        const SCOPES = 'https://www.googleapis.com/auth/drive.file https://www.googleapis.com/auth/drive.appdata';
+        const BACKUP_FILENAME = 'madrasa_backup.zip';
         let tokenClient;
+        let gdAccessToken = null;
+        let gdBusy = false;
+
+        function gdSetProgress(show, text, pct) {
+            const wrap = document.getElementById('gdProgressWrap');
+            if (!wrap) return;
+            wrap.style.display = show ? 'block' : 'none';
+            if (text) document.getElementById('gdProgressText').textContent = text;
+            if (typeof pct === 'number') document.getElementById('gdProgressBar').style.width = pct + '%';
+        }
+
+        function gdSetButtons(disabled) {
+            gdBusy = disabled;
+            const bb = document.getElementById('gdBtnBackup');
+            const br = document.getElementById('gdBtnRestore');
+            if (bb) { bb.disabled = disabled; bb.style.opacity = disabled ? '.6' : '1'; }
+            if (br) { br.disabled = disabled; br.style.opacity = disabled ? '.6' : '1'; }
+        }
+
+        function gdUpdateConnectionUI(connected, email) {
+            const badge = document.getElementById('gdConnectionBadge');
+            const statusText = document.getElementById('gdSyncStatusText');
+            const disconnectBtn = document.getElementById('gdBtnDisconnect');
+            if (connected) {
+                badge.style.background = 'var(--green-light)';
+                badge.style.color = 'var(--green-dark)';
+                badge.innerHTML = '<i class="fa fa-check-circle" style="font-size:.55rem;"></i> متصل';
+                statusText.textContent = email ? ('متصل بحساب: ' + email) : 'گوگل ڈرائیو سے متصل';
+                statusText.style.color = 'var(--green-primary)';
+                if (disconnectBtn) disconnectBtn.style.display = 'inline-flex';
+            } else {
+                badge.style.background = '#fee';
+                badge.style.color = '#c0392b';
+                badge.innerHTML = '<i class="fa fa-circle" style="font-size:.45rem;"></i> غیر متصل';
+                statusText.textContent = 'غیر متصل';
+                statusText.style.color = '#888';
+                if (disconnectBtn) disconnectBtn.style.display = 'none';
+            }
+        }
+
+        function gdShowBackupInfo(modifiedTime, sizeBytes) {
+            const wrap = document.getElementById('gdLastBackupInfo');
+            if (!wrap) return;
+            wrap.style.display = 'block';
+            if (modifiedTime) {
+                const d = new Date(modifiedTime);
+                document.getElementById('gdLastBackupTime').textContent =
+                    d.toLocaleDateString('ur-PK') + ' ' + d.toLocaleTimeString('ur-PK', {hour:'2-digit',minute:'2-digit'});
+            }
+            if (sizeBytes) {
+                const kb = (parseInt(sizeBytes) / 1024).toFixed(1);
+                document.getElementById('gdLastBackupSize').textContent =
+                    kb > 1024 ? (kb / 1024).toFixed(2) + ' MB' : kb + ' KB';
+            }
+        }
+
         function initGoogleAuth() {
+            if (CLIENT_ID.startsWith('YOUR_CLIENT_ID')) {
+                Swal.fire({
+                    title: 'گوگل OAuth سیٹ اپ درکار ہے',
+                    html: '<div style="text-align:left;font-size:.85rem;line-height:1.8;direction:ltr;">' +
+                        '<strong>Steps to enable Google Drive Sync:</strong><br>' +
+                        '1. Go to <a href="https://console.cloud.google.com" target="_blank">Google Cloud Console</a><br>' +
+                        '2. Create a new project (or select existing)<br>' +
+                        '3. Enable <strong>Google Drive API</strong><br>' +
+                        '4. Go to <strong>Credentials → Create OAuth 2.0 Client ID</strong><br>' +
+                        '5. Set Application Type: <strong>Web application</strong><br>' +
+                        '6. Add your URL to <strong>Authorized JavaScript Origins</strong><br>' +
+                        '&nbsp;&nbsp;&nbsp;(e.g. <code>http://localhost</code>)<br>' +
+                        '7. Copy the <strong>Client ID</strong> and paste it in index.html<br>' +
+                        '&nbsp;&nbsp;&nbsp;Replace: <code>YOUR_CLIENT_ID.apps.googleusercontent.com</code></div>',
+                    icon: 'info',
+                    confirmButtonText: 'سمجھ آ گئی',
+                    confirmButtonColor: '#1a6b3c',
+                    width: 550
+                });
+                return false;
+            }
             if (!navigator.onLine) {
                 showToast('error', 'آپ آف لائن ہیں۔ کلاؤڈ سنک کے لیے انٹرنیٹ درکار ہے۔');
                 return false;
             }
-            if (typeof google === 'undefined') {
-                showToast('error', 'گوگل سروسز لوڈ نہیں ہوئیں۔ انٹرنیٹ چیک کریں');
+            if (typeof google === 'undefined' || !google.accounts) {
+                showToast('error', 'گوگل سروسز لوڈ نہیں ہوئیں۔ انٹرنیٹ چیک کریں یا صفحہ ریفریش کریں۔');
                 return false;
             }
             if (!tokenClient) {
                 tokenClient = google.accounts.oauth2.initTokenClient({
                     client_id: CLIENT_ID,
                     scope: SCOPES,
-                    callback: (tokenResponse) => { }
+                    callback: () => {}
                 });
             }
             return true;
         }
+
+        function gdRequestToken() {
+            return new Promise((resolve, reject) => {
+                if (gdAccessToken) { resolve(gdAccessToken); return; }
+                if (!initGoogleAuth()) { reject(new Error('Google Auth init failed')); return; }
+                tokenClient.callback = (resp) => {
+                    if (resp.error) { reject(new Error(resp.error)); return; }
+                    gdAccessToken = resp.access_token;
+                    // Get user email
+                    fetch('https://www.googleapis.com/oauth2/v2/userinfo', {
+                        headers: { Authorization: 'Bearer ' + gdAccessToken }
+                    }).then(r => r.json()).then(info => {
+                        gdUpdateConnectionUI(true, info.email || '');
+                        localStorage.setItem('gdEmail', info.email || '');
+                    }).catch(() => gdUpdateConnectionUI(true, ''));
+                    resolve(gdAccessToken);
+                };
+                tokenClient.requestAccessToken({ prompt: gdAccessToken ? '' : 'consent' });
+            });
+        }
+
         async function authAndSyncToDrive() {
-            if (!initGoogleAuth()) return;
-            tokenClient.callback = async (resp) => {
-                if (resp.error) return showToast('error', 'گوگل لاگ ان ناکام');
-                syncDataToDrive(resp.access_token);
-            };
-            tokenClient.requestAccessToken({ prompt: '' });
-        }
-        async function authAndRestoreFromDrive() {
-            if (!initGoogleAuth()) return;
-            tokenClient.callback = async (resp) => {
-                if (resp.error) return showToast('error', 'گوگل لاگ ان ناکام');
-                restoreDataFromDrive(resp.access_token);
-            };
-            tokenClient.requestAccessToken({ prompt: '' });
-        }
-        async function syncDataToDrive(token) {
-            showToast('info', 'گوگل ڈرائیو پر بیک اپ جاری ہے...');
+            if (gdBusy) return;
             try {
+                gdSetButtons(true);
+                gdSetProgress(true, 'گوگل سے رابطہ قائم ہو رہا ہے...', 10);
+                const token = await gdRequestToken();
+                await syncDataToDrive(token);
+            } catch (err) {
+                if (err.message !== 'Google Auth init failed') {
+                    showToast('error', 'گوگل لاگ ان ناکام: ' + err.message);
+                }
+                gdSetProgress(false);
+                gdSetButtons(false);
+            }
+        }
+
+        async function authAndRestoreFromDrive() {
+            if (gdBusy) return;
+            try {
+                gdSetButtons(true);
+                gdSetProgress(true, 'گوگل سے رابطہ قائم ہو رہا ہے...', 10);
+                const token = await gdRequestToken();
+                await restoreDataFromDrive(token);
+            } catch (err) {
+                if (err.message !== 'Google Auth init failed') {
+                    showToast('error', 'گوگل لاگ ان ناکام: ' + err.message);
+                }
+                gdSetProgress(false);
+                gdSetButtons(false);
+            }
+        }
+
+        async function syncDataToDrive(token) {
+            try {
+                gdSetProgress(true, 'ڈیٹا بیس سے ڈیٹا نکالا جا رہا ہے...', 20);
                 const data = {};
                 for (const store of STORES) { data[store] = await dbGetAll(store); }
+                data._meta = { exportDate: new Date().toISOString(), appVersion: '2.0', stores: STORES.length };
+
+                gdSetProgress(true, 'ZIP فائل تیار ہو رہی ہے...', 40);
                 const zip = new JSZip();
                 zip.file("madrasa_database.json", JSON.stringify(data));
                 const zipBlob = await zip.generateAsync({ type: "blob", compression: "DEFLATE", compressionOptions: { level: 9 } });
-                const fileMetadata = { name: 'madrasa_backup.zip', parents: ['appDataFolder'] };
+
+                gdSetProgress(true, 'گوگل ڈرائیو پر تلاش جاری ہے...', 55);
+                // Search in appDataFolder
+                const searchRes = await fetch('https://www.googleapis.com/drive/v3/files?spaces=appDataFolder&q=name%3D%22' + BACKUP_FILENAME + '%22&fields=files(id,name,modifiedTime,size)', {
+                    headers: { Authorization: 'Bearer ' + token }
+                });
+                if (!searchRes.ok) {
+                    const errData = await searchRes.json().catch(() => ({}));
+                    throw new Error(errData.error?.message || 'Drive search failed: ' + searchRes.status);
+                }
+                const searchData = await searchRes.json();
+
+                gdSetProgress(true, 'اپ لوڈ ہو رہا ہے...', 70);
+                let uploadUrl, method;
+                if (searchData.files && searchData.files.length > 0) {
+                    // Update existing
+                    uploadUrl = 'https://www.googleapis.com/upload/drive/v3/files/' + searchData.files[0].id + '?uploadType=multipart&fields=id,name,modifiedTime,size';
+                    method = 'PATCH';
+                } else {
+                    // Create new
+                    uploadUrl = 'https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart&fields=id,name,modifiedTime,size';
+                    method = 'POST';
+                }
+                const fileMetadata = { name: BACKUP_FILENAME, parents: method === 'POST' ? ['appDataFolder'] : undefined };
                 const form = new FormData();
                 form.append('metadata', new Blob([JSON.stringify(fileMetadata)], { type: 'application/json' }));
                 form.append('file', zipBlob);
-                const searchRes = await fetch('https://www.googleapis.com/drive/v3/files?spaces=appDataFolder&q=name="madrasa_backup.zip"', {
-                    headers: { Authorization: 'Bearer ' + token }
-                });
-                const searchData = await searchRes.json();
-                let uploadUrl = 'https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart';
-                let method = 'POST';
-                if (searchData.files && searchData.files.length > 0) {
-                    uploadUrl = `https://www.googleapis.com/upload/drive/v3/files/${searchData.files[0].id}?uploadType=multipart`;
-                    method = 'PATCH';
+
+                const upRes = await fetch(uploadUrl, { method, headers: { Authorization: 'Bearer ' + token }, body: form });
+                if (!upRes.ok) {
+                    const errData = await upRes.json().catch(() => ({}));
+                    throw new Error(errData.error?.message || 'Upload failed: ' + upRes.status);
                 }
-                const upRes = await fetch(uploadUrl, { method: method, headers: { Authorization: 'Bearer ' + token }, body: form });
-                if (upRes.ok) showToast('success', 'گوگل ڈرائیو پر بیک اپ کامیاب!');
-                else showToast('error', 'بیک اپ ناکام ہو گیا۔');
-            } catch (err) { showToast('error', 'خرابی: ' + err.message); }
+
+                const upData = await upRes.json();
+                gdSetProgress(true, 'کامیاب!', 100);
+                gdShowBackupInfo(upData.modifiedTime, upData.size || zipBlob.size);
+                localStorage.setItem('gdLastBackup', JSON.stringify({ time: upData.modifiedTime, size: upData.size || zipBlob.size }));
+
+                setTimeout(() => {
+                    gdSetProgress(false);
+                    gdSetButtons(false);
+                    showToast('success', 'گوگل ڈرائیو پر بیک اپ کامیابی سے محفوظ ہو گیا!');
+                }, 800);
+            } catch (err) {
+                gdSetProgress(false);
+                gdSetButtons(false);
+                showToast('error', 'بیک اپ ناکام: ' + err.message);
+            }
         }
+
         async function restoreDataFromDrive(token) {
-            showToast('info', 'گوگل ڈرائیو سے تلاش جاری ہے...');
             try {
-                const searchRes = await fetch('https://www.googleapis.com/drive/v3/files?spaces=appDataFolder&q=name="madrasa_backup.zip"', {
+                gdSetProgress(true, 'گوگل ڈرائیو پر بیک اپ تلاش ہو رہا ہے...', 20);
+                const searchRes = await fetch('https://www.googleapis.com/drive/v3/files?spaces=appDataFolder&q=name%3D%22' + BACKUP_FILENAME + '%22&fields=files(id,name,modifiedTime,size)', {
                     headers: { Authorization: 'Bearer ' + token }
                 });
+                if (!searchRes.ok) throw new Error('Drive search failed');
                 const searchData = await searchRes.json();
-                if (!searchData.files || searchData.files.length === 0) return showToast('warning', 'گوگل ڈرائیو پر کوئی بیک اپ نہیں ملا');
-                Swal.fire({
-                    title: 'ڈیٹا درآمد کریں؟',
-                    text: 'موجودہ تمام ڈیٹا مٹ جائے گا اور گوگل ڈرائیو والا ڈیٹا آ جائے گا۔',
-                    icon: 'warning', showCancelButton: true, confirmButtonText: 'ہاں، درآمد کریں', cancelButtonText: 'منسوخ', confirmButtonColor: '#c0392b'
-                }).then(async r => {
-                    if (!r.isConfirmed) return;
-                    showToast('info', 'ڈاؤن لوڈ اور ڈیٹا نکالا جا رہا ہے...');
-                    const fileRes = await fetch(`https://www.googleapis.com/drive/v3/files/${searchData.files[0].id}?alt=media`, {
-                        headers: { Authorization: 'Bearer ' + token }
-                    });
-                    const blob = await fileRes.blob();
-                    const zip = await JSZip.loadAsync(blob);
-                    const jsonFile = zip.file("madrasa_database.json");
-                    if (!jsonFile) throw new Error("ZIP میں database.json نہیں ملا");
-                    const text = await jsonFile.async("string");
-                    const data = JSON.parse(text);
-                    for (const store of STORES) {
-                        if (data[store]) {
-                            await dbClear(store);
-                            for (const record of data[store]) { await dbAdd(store, record); }
-                        }
-                    }
-                    showToast('success', 'ڈیٹا کامیابی سے بحال ہو گیا!');
-                    await loadAppData();
+
+                if (!searchData.files || searchData.files.length === 0) {
+                    gdSetProgress(false);
+                    gdSetButtons(false);
+                    showToast('warning', 'گوگل ڈرائیو پر کوئی بیک اپ نہیں ملا۔ پہلے بیک اپ محفوظ کریں۔');
+                    return;
+                }
+
+                const fileInfo = searchData.files[0];
+                gdSetProgress(false);
+                gdSetButtons(false);
+
+                const backupDate = new Date(fileInfo.modifiedTime);
+                const sizeKB = (parseInt(fileInfo.size || 0) / 1024).toFixed(1);
+
+                const result = await Swal.fire({
+                    title: 'گوگل ڈرائیو سے بحال کریں؟',
+                    html: '<div style="text-align:right;font-size:.9rem;line-height:1.8;">' +
+                          '<div><i class="fa fa-calendar text-success me-1"></i> بیک اپ تاریخ: <strong>' + backupDate.toLocaleDateString('ur-PK') + ' ' + backupDate.toLocaleTimeString('ur-PK', {hour:'2-digit',minute:'2-digit'}) + '</strong></div>' +
+                          '<div><i class="fa fa-hdd text-success me-1"></i> سائز: <strong>' + sizeKB + ' KB</strong></div>' +
+                          '<div class="alert alert-danger mt-2 py-1" style="font-size:.8rem;"><i class="fa fa-exclamation-triangle me-1"></i> موجودہ تمام ڈیٹا مٹ جائے گا!</div></div>',
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonText: '<i class="fa fa-cloud-download-alt me-1"></i> ہاں، بحال کریں',
+                    cancelButtonText: 'منسوخ',
+                    confirmButtonColor: '#1a6b3c'
                 });
-            } catch (err) { showToast('error', 'خرابی: ' + err.message); }
+
+                if (!result.isConfirmed) return;
+
+                gdSetButtons(true);
+                gdSetProgress(true, 'فائل ڈاؤن لوڈ ہو رہی ہے...', 30);
+                const fileRes = await fetch('https://www.googleapis.com/drive/v3/files/' + fileInfo.id + '?alt=media', {
+                    headers: { Authorization: 'Bearer ' + token }
+                });
+                if (!fileRes.ok) throw new Error('Download failed');
+
+                gdSetProgress(true, 'ZIP سے ڈیٹا نکالا جا رہا ہے...', 55);
+                const blob = await fileRes.blob();
+                const zip = await JSZip.loadAsync(blob);
+                const jsonFile = zip.file("madrasa_database.json");
+                if (!jsonFile) throw new Error("ZIP میں madrasa_database.json نہیں ملا");
+
+                gdSetProgress(true, 'ڈیٹا بیس میں درآمد ہو رہا ہے...', 70);
+                const text = await jsonFile.async("string");
+                const data = JSON.parse(text);
+                let restored = 0;
+                for (const store of STORES) {
+                    if (data[store]) {
+                        await dbClear(store);
+                        for (const record of data[store]) { await dbAdd(store, record); }
+                        restored++;
+                    }
+                }
+
+                gdSetProgress(true, 'کامیاب! ایپ لوڈ ہو رہی ہے...', 100);
+                gdShowBackupInfo(fileInfo.modifiedTime, fileInfo.size);
+                localStorage.setItem('gdLastBackup', JSON.stringify({ time: fileInfo.modifiedTime, size: fileInfo.size }));
+
+                setTimeout(async () => {
+                    gdSetProgress(false);
+                    gdSetButtons(false);
+                    showToast('success', restored + ' اسٹورز کا ڈیٹا کامیابی سے بحال ہو گیا!');
+                    await loadAppData();
+                }, 800);
+            } catch (err) {
+                gdSetProgress(false);
+                gdSetButtons(false);
+                showToast('error', 'بحالی ناکام: ' + err.message);
+            }
         }
+
+        function disconnectGoogle() {
+            Swal.fire({
+                title: 'گوگل سے رابطہ منقطع کریں؟',
+                text: 'آپ کا بیک اپ ڈیٹا گوگل ڈرائیو پر محفوظ رہے گا۔',
+                icon: 'question',
+                showCancelButton: true,
+                confirmButtonText: 'ہاں',
+                cancelButtonText: 'نہیں'
+            }).then(r => {
+                if (r.isConfirmed) {
+                    if (gdAccessToken && google.accounts && google.accounts.oauth2) {
+                        google.accounts.oauth2.revoke(gdAccessToken, () => {});
+                    }
+                    gdAccessToken = null;
+                    tokenClient = null;
+                    localStorage.removeItem('gdEmail');
+                    gdUpdateConnectionUI(false);
+                    showToast('success', 'گوگل اکاؤنٹ سے رابطہ منقطع ہو گیا');
+                }
+            });
+        }
+
+        // Restore last backup info from localStorage on page load
+        function gdRestoreUIState() {
+            const saved = localStorage.getItem('gdLastBackup');
+            if (saved) {
+                try {
+                    const info = JSON.parse(saved);
+                    gdShowBackupInfo(info.time, info.size);
+                } catch(e) {}
+            }
+            const email = localStorage.getItem('gdEmail');
+            if (email) {
+                document.getElementById('gdSyncStatusText').textContent = 'پچھلی بار متصل: ' + email;
+            }
+        }
+        // Call on main init
+        setTimeout(gdRestoreUIState, 1000);
         document.addEventListener('DOMContentLoaded', () => main());
     </script>
 <script type="module">
