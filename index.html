@@ -2050,7 +2050,9 @@
 </tr>
 </thead>
 <tbody id="promoHistoryBody">
-<tr><td class="text-center text-muted p-3" colspan="4">کوئی تاریخ نہیں</td></tr>
+<tr>
+<td class="text-center text-muted p-3" colspan="4">کوئی تاریخ نہیں</td>
+</tr>
 </tbody>
 </table>
 </div>
@@ -2085,7 +2087,8 @@
 <input class="form-control form-control-sm" id="settingPrintHeader" placeholder="پرنٹ کے اوپری حصے کے لیے اضافی عبارت" type="text"/>
 </div>
 <div class="col-12 col-sm-6">
-<label class="form-label mb-0" style="font-size:.85rem">لیٹ فیس رقم (روپے)</label>
+<label class="form-label mb-0" style="font-size:.85rem">لیٹ فیس رقم
+                                                (روپے)</label>
 <input class="form-control form-control-sm" id="settingLateFee" placeholder="500" type="number"/>
 </div>
 </div>
@@ -2215,7 +2218,8 @@
 <div id="gdLastBackupInfo" style="background:#f8faf8;border:1px solid #e8f0ea;border-radius:var(--radius);padding:.4rem .6rem;margin-bottom:.5rem;display:none;font-size:.78rem;">
 <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:.3rem;">
 <div style="color:#555;"><i class="fa fa-clock text-success me-1"></i> آخری بیک اپ:
-                                                            <strong id="gdLastBackupTime">—</strong></div>
+                                                            <strong id="gdLastBackupTime">—</strong>
+</div>
 <div style="color:#555;"><i class="fa fa-hdd text-success me-1"></i> سائز: <span id="gdLastBackupSize">—</span></div>
 </div>
 </div>
@@ -2267,7 +2271,9 @@
 </tr>
 </thead>
 <tbody id="auditLogBody">
-<tr><td class="text-center text-muted" colspan="6">لوڈ ہو رہا ہے...</td></tr>
+<tr>
+<td class="text-center text-muted" colspan="6">لوڈ ہو رہا ہے...</td>
+</tr>
 </tbody>
 </table>
 </div>
@@ -2293,6 +2299,25 @@
                 کریں</button>
 </div>
 <div id="printArea"></div>
+<!-- Entity Detail Viewer Modal -->
+<div class="modal fade" id="entityDetailModal" tabindex="-1">
+<div class="modal-dialog modal-xl modal-dialog-scrollable">
+<div class="modal-content animate__animated animate__zoomIn">
+<div class="modal-header" style="background:var(--green-light)">
+<h5 class="modal-title" id="entityDetailTitle"><i class="fa fa-eye text-success me-1"></i>
+                            تفصیلات</h5>
+<button class="btn-close" data-bs-dismiss="modal" type="button"></button>
+</div>
+<div class="modal-body" id="entityDetailBody" style="max-height:75vh;overflow-y:auto;font-size:.88rem">
+</div>
+<div class="modal-footer">
+<button class="btn-outline-green btn-sm" onclick="printEntityDetail()"><i class="fa fa-print"></i> پرنٹ</button>
+<button class="btn-outline-green btn-sm" data-bs-dismiss="modal"><i class="fa fa-times"></i> بند
+                            کریں</button>
+</div>
+</div>
+</div>
+</div>
 <div class="modal fade" id="studentModal" tabindex="-1">
 <div class="modal-dialog modal-lg">
 <div class="modal-content animate__animated animate__zoomIn">
@@ -2345,10 +2370,14 @@
 <label>بلڈ گروپ</label>
 <select class="form-select" id="sBloodGroup">
 <option value="">منتخب کریں</option>
-<option>A+</option><option>A-</option>
-<option>B+</option><option>B-</option>
-<option>AB+</option><option>AB-</option>
-<option>O+</option><option>O-</option>
+<option>A+</option>
+<option>A-</option>
+<option>B+</option>
+<option>B-</option>
+<option>AB+</option>
+<option>AB-</option>
+<option>O+</option>
+<option>O-</option>
 </select>
 </div>
 <div class="col-12 col-md-4">
@@ -3284,6 +3313,13 @@
                 d.appendChild(document.createTextNode(String(str)));
                 return d.innerHTML;
             }
+            function getOrCreateTbody(tableId) {
+                const table = document.getElementById(tableId);
+                if (!table) return null;
+                let tbody = table.querySelector('tbody');
+                if (!tbody) { tbody = document.createElement('tbody'); table.appendChild(tbody); }
+                return tbody;
+            }
             function calcFeeNet() {
                 const due = parseFloat(document.getElementById('fcDue').value) || 0;
                 const discount = parseFloat(document.getElementById('fcDiscount').value) || 0;
@@ -3302,7 +3338,7 @@
                 if (!currentUser) return;
                 try {
                     await dbAdd('auditlog', { user: currentUser.username, role: currentUser.role, action, module, detail: typeof detail === 'string' ? detail : JSON.stringify(detail), timestamp: new Date().toISOString() });
-                } catch(e) {}
+                } catch (e) { }
             }
             async function seedData() {
                 const users = await dbGetAll('users');
@@ -3693,6 +3729,195 @@
                 const icons = { success: 'success', error: 'error', warning: 'warning', info: 'info' };
                 Swal.fire({ toast: true, position: 'top-end', icon: icons[type] || 'info', title: msg, showConfirmButton: false, timer: 3000, timerProgressBar: true, customClass: { popup: 'swal2-toast-custom' } });
             }
+            // ══════════════ ENTITY DETAIL VIEWERS ══════════════
+            function showEntityDetail(title, html) {
+                document.getElementById('entityDetailTitle').innerHTML = `<i class="fa fa-eye text-success me-1"></i> ${title}`;
+                document.getElementById('entityDetailBody').innerHTML = html;
+                new bootstrap.Modal(document.getElementById('entityDetailModal')).show();
+            }
+            function printEntityDetail() {
+                document.getElementById('printArea').innerHTML = document.getElementById('entityDetailBody').innerHTML;
+                window.print();
+            }
+            function detailSection(icon, title, content) {
+                return `<div class="mb-3"><h6 style="color:var(--green-primary);border-bottom:2px solid var(--green-light);padding-bottom:.4rem;margin-bottom:.5rem"><i class="fa fa-${icon} me-1"></i> ${title}</h6>${content}</div>`;
+            }
+            function detailRow(label, value) {
+                return `<div class="row mb-1"><div class="col-4 col-md-3 text-muted" style="font-size:.82rem">${label}</div><div class="col-8 col-md-9">${value || '—'}</div></div>`;
+            }
+            function miniTable(headers, rows) {
+                if (!rows.length) return '<div class="text-muted text-center p-2" style="font-size:.8rem">کوئی ریکارڈ نہیں</div>';
+                return `<div class="table-responsive"><table class="table table-sm table-bordered table-striped mb-0"><thead><tr style="background:var(--green-light);font-size:.78rem">${headers.map(h => `<th>${h}</th>`).join('')}</tr></thead><tbody style="font-size:.8rem">${rows.join('')}</tbody></table></div>`;
+            }
+
+            async function viewStudent(id) {
+                const [s, classes, feeCols, attendance, exams, fines, library, hostel] = await Promise.all([
+                    dbGet('students', id), dbGetAll('classes'), dbGetAll('feecollections'),
+                    dbGetAll('attendance'), dbGetAll('exams'), dbGetAll('fines'),
+                    dbGetAll('library'), dbGetAll('hostel')
+                ]);
+                if (!s) return;
+                const cls = classes.find(c => c.id === s.classId);
+                const statusColors = { active: 'green', withdrawn: 'red', graduated: 'gold', suspended: 'red' };
+                const statusLabels = { active: 'فعال', withdrawn: 'دستبردار', graduated: 'فارغ التحصیل', suspended: 'معطل' };
+
+                // Personal Info
+                let info = detailRow('داخلہ نمبر', escapeHtml(s.enrollNo));
+                info += detailRow('نام', escapeHtml(s.name));
+                info += detailRow('والد کا نام', escapeHtml(s.fatherName));
+                info += detailRow('جماعت', cls ? escapeHtml(cls.name) : '—');
+                info += detailRow('جنس', escapeHtml(s.gender || ''));
+                info += detailRow('تاریخ پیدائش', s.dob || '—');
+                info += detailRow('بلڈ گروپ', s.bloodGroup || '—');
+                info += detailRow('سرپرست / ولی', escapeHtml(s.guardianName || ''));
+                info += detailRow('رابطہ', escapeHtml(s.contact || ''));
+                info += detailRow('ایمرجنسی رابطہ', escapeHtml(s.emergencyContact || ''));
+                info += detailRow('پتہ', escapeHtml(s.address || ''));
+                info += detailRow('حالت', `<span class="badge-${statusColors[s.status] || 'green'}">${statusLabels[s.status] || 'فعال'}</span>`);
+                info += detailRow('سابقہ تعلیم', escapeHtml(s.prevEducation || ''));
+                info += detailRow('تاریخ داخلہ', s.enrollDate || '—');
+                if (s.photo) info += `<div class="text-center mt-2"><img src="${s.photo}" style="max-width:100px;max-height:100px;border-radius:8px;border:2px solid var(--green-primary)" alt="photo"/></div>`;
+
+                // Fee History
+                const sFees = feeCols.filter(f => f.studentId === s.id).sort((a, b) => (b.date || '').localeCompare(a.date || ''));
+                const totalPaid = sFees.reduce((a, b) => a + (b.paid || 0), 0);
+                const feeRows = sFees.map(f => `<tr><td>${f.receiptNo || f.id}</td><td>${f.type || ''}</td><td>${f.month || ''}</td><td>Rs ${(f.paid || 0).toLocaleString()}</td><td>${f.method || ''}</td><td>${f.date || ''}</td></tr>`);
+                const feeSummary = `<div class="mb-2"><span class="badge bg-success me-1">کل ادا شدہ: Rs ${totalPaid.toLocaleString()}</span>${cls ? `<span class="badge bg-info text-dark">ماہانہ فیس: Rs ${(cls.monthlyFee || 0).toLocaleString()}</span>` : ''}</div>`;
+
+                // Attendance
+                const sAtt = attendance.filter(a => a.studentId === s.id);
+                const pCount = sAtt.filter(a => a.status === 'ح').length;
+                const aCount = sAtt.filter(a => a.status === 'غ').length;
+                const lCount = sAtt.filter(a => a.status === 'ر').length;
+                const attPct = sAtt.length > 0 ? ((pCount / sAtt.length) * 100).toFixed(1) : '0';
+                const attSummary = `<div class="d-flex gap-2 flex-wrap"><span class="badge-green">حاضر: ${pCount}</span><span class="badge-red">غائب: ${aCount}</span><span class="badge-gold">رخصت: ${lCount}</span><span class="badge bg-info text-dark">کل: ${sAtt.length}</span><span class="badge bg-${attPct >= 75 ? 'success' : attPct >= 50 ? 'warning' : 'danger'}">فیصد: ${attPct}%</span></div>`;
+
+                // Exams
+                const sExams = exams.filter(e => e.studentId === s.id);
+                const examRows = sExams.map(e => { const c = classes.find(cl => cl.id === e.classId); return `<tr><td>${escapeHtml(e.examName)}</td><td>${escapeHtml(e.subject)}</td><td>${e.obtained}/${e.total}</td><td>${e.percent}</td><td>${e.grade}</td><td><span style="color:${e.result === 'پاس' ? 'green' : 'red'}">${e.result}</span></td></tr>`; });
+
+                // Fines
+                const sFines = fines.filter(f => f.studentId === s.id);
+                const fineRows = sFines.map(f => `<tr><td>${escapeHtml(f.type)}</td><td>Rs ${(f.amount || 0).toLocaleString()}</td><td><span class="badge-${f.status === 'paid' ? 'green' : 'red'}">${f.status === 'paid' ? 'ادا شدہ' : 'باقی'}</span></td><td>${f.date || ''}</td></tr>`);
+
+                // Library
+                const sLib = library.filter(l => l.studentId === s.id);
+                const libRows = sLib.map(l => `<tr><td>${escapeHtml(l.bookName)}</td><td>${l.issueDate || ''}</td><td>${l.dueDate || ''}</td><td><span class="badge-${l.status === 'returned' ? 'green' : 'gold'}">${l.status === 'returned' ? 'واپس' : 'جاری'}</span></td></tr>`);
+
+                // Hostel
+                const sHostel = hostel.filter(h => h.studentId === s.id);
+                const hostelRows = sHostel.map(h => `<tr><td>${escapeHtml(h.room)}</td><td><span class="badge-${h.residentStatus === 'active' ? 'green' : 'red'}">${h.residentStatus === 'active' ? 'مقیم' : 'چھوڑ چکا'}</span></td><td>Rs ${(h.messFee || 0).toLocaleString()}</td><td>${h.checkInDate || '—'}</td><td>${h.checkOutDate || '—'}</td></tr>`);
+
+                let html = detailSection('user', 'ذاتی معلومات', info);
+                html += detailSection('money-bill-wave', `فیس ہسٹری (${sFees.length})`, feeSummary + miniTable(['رسید#', 'قسم', 'ماہ', 'رقم', 'طریقہ', 'تاریخ'], feeRows));
+                html += detailSection('clipboard-check', 'حاضری خلاصہ', attSummary);
+                html += detailSection('pen-nib', `امتحانات (${sExams.length})`, miniTable(['امتحان', 'مضمون', 'نمبر', 'فیصد', 'گریڈ', 'نتیجہ'], examRows));
+                html += detailSection('balance-scale-left', `جرمانے (${sFines.length})`, miniTable(['قسم', 'رقم', 'حالت', 'تاریخ'], fineRows));
+                html += detailSection('book-reader', `لائبریری (${sLib.length})`, miniTable(['کتاب', 'جاری', 'واپسی', 'حالت'], libRows));
+                if (sHostel.length) html += detailSection('bed', 'ہاسٹل', miniTable(['کمرہ', 'حالت', 'میس فیس', 'داخلہ', 'اخراج'], hostelRows));
+
+                showEntityDetail(`طالب علم: ${escapeHtml(s.name)}`, html);
+            }
+
+            async function viewTeacher(id) {
+                const [t, classes, salaries, staffAtt, timetables] = await Promise.all([
+                    dbGet('teachers', id), dbGetAll('classes'), dbGetAll('salaries'),
+                    dbGetAll('staffattendance'), dbGetAll('timetable')
+                ]);
+                if (!t) return;
+
+                // Personal Info
+                let info = detailRow('نام', escapeHtml(t.name));
+                info += detailRow('مضامین', escapeHtml(t.subjects || ''));
+                info += detailRow('موبائل', escapeHtml(t.mobile || ''));
+                info += detailRow('تنخواہ', `Rs ${(t.salary || 0).toLocaleString()}`);
+                info += detailRow('تقرری تاریخ', t.appointDate || '—');
+                info += detailRow('تعلیم', escapeHtml(t.qualification || ''));
+                if (t.photo) info += `<div class="text-center mt-2"><img src="${t.photo}" style="max-width:100px;max-height:100px;border-radius:8px;border:2px solid var(--green-primary)" alt="photo"/></div>`;
+
+                // Classes assigned
+                const tClasses = classes.filter(c => parseInt(c.teacher) === t.id);
+                const classRows = tClasses.map(c => {
+                    return `<tr><td>${escapeHtml(c.name)}</td><td>${escapeHtml(c.subjects || '')}</td><td>Rs ${(c.monthlyFee || 0).toLocaleString()}</td></tr>`;
+                });
+
+                // Salary History
+                const tSalaries = salaries.filter(s => s.teacherId === t.id).sort((a, b) => (b.date || '').localeCompare(a.date || ''));
+                const totalSalPaid = tSalaries.reduce((a, b) => a + (b.paid || 0), 0);
+                const totalSalBal = tSalaries.reduce((a, b) => a + (b.balance || 0), 0);
+                const salRows = tSalaries.map(s => `<tr><td>${s.slipId || s.id}</td><td>${s.month || ''}</td><td>Rs ${(s.fixedSalary || 0).toLocaleString()}</td><td>Rs ${(s.paid || 0).toLocaleString()}</td><td>Rs ${(s.balance || 0).toLocaleString()}</td><td>${s.date || ''}</td></tr>`);
+                const salSummary = `<div class="mb-2"><span class="badge bg-success me-1">کل ادا: Rs ${totalSalPaid.toLocaleString()}</span><span class="badge bg-danger">کل باقی: Rs ${totalSalBal.toLocaleString()}</span></div>`;
+
+                // Staff Attendance
+                const tAtt = staffAtt.filter(a => a.teacherId === t.id);
+                const pCount = tAtt.filter(a => a.status === 'ح').length;
+                const aCount = tAtt.filter(a => a.status === 'غ').length;
+                const lCount = tAtt.filter(a => a.status === 'ر').length;
+                const attPct = tAtt.length > 0 ? ((pCount / tAtt.length) * 100).toFixed(1) : '0';
+                const attSummary = `<div class="d-flex gap-2 flex-wrap"><span class="badge-green">حاضر: ${pCount}</span><span class="badge-red">غائب: ${aCount}</span><span class="badge-gold">رخصت: ${lCount}</span><span class="badge bg-info text-dark">کل: ${tAtt.length}</span><span class="badge bg-${attPct >= 75 ? 'success' : attPct >= 50 ? 'warning' : 'danger'}">فیصد: ${attPct}%</span></div>`;
+
+                let html = detailSection('user-tie', 'ذاتی معلومات', info);
+                html += detailSection('school', `تدریسی جماعتیں (${tClasses.length})`, miniTable(['جماعت', 'مضامین', 'ماہانہ فیس'], classRows));
+                html += detailSection('wallet', `تنخواہ ہسٹری (${tSalaries.length})`, salSummary + miniTable(['سلپ#', 'ماہ', 'مقررہ', 'ادا شدہ', 'باقی', 'تاریخ'], salRows));
+                html += detailSection('user-clock', 'حاضری خلاصہ', attSummary);
+
+                showEntityDetail(`استاد: ${escapeHtml(t.name)}`, html);
+            }
+
+            async function viewClass(id) {
+                const [c, teachers, students, feeCols, exams, attendance] = await Promise.all([
+                    dbGet('classes', id), dbGetAll('teachers'), dbGetAll('students'),
+                    dbGetAll('feecollections'), dbGetAll('exams'), dbGetAll('attendance')
+                ]);
+                if (!c) return;
+                const t = teachers.find(te => te.id == c.teacher);
+                const cStudents = students.filter(s => s.classId === c.id);
+
+                // Class Info
+                let info = detailRow('جماعت کا نام', escapeHtml(c.name));
+                info += detailRow('استاد', t ? escapeHtml(t.name) : '—');
+                info += detailRow('مضامین', escapeHtml(c.subjects || ''));
+                info += detailRow('ماہانہ فیس', `Rs ${(c.monthlyFee || 0).toLocaleString()}`);
+                info += detailRow('کل طلبا', `<span class="badge-green">${cStudents.length}</span>`);
+
+                // Students List
+                const studentRows = cStudents.map((s, i) => {
+                    const statusLabels = { active: 'فعال', withdrawn: 'دستبردار', graduated: 'فارغ', suspended: 'معطل' };
+                    const statusColors = { active: 'green', withdrawn: 'red', graduated: 'gold', suspended: 'red' };
+                    return `<tr><td>${i + 1}</td><td>${escapeHtml(s.enrollNo)}</td><td><a href="#" onclick="viewStudent(${s.id});return false;" style="color:var(--green-primary);text-decoration:underline">${escapeHtml(s.name)}</a></td><td>${escapeHtml(s.fatherName)}</td><td><span class="badge-${statusColors[s.status] || 'green'}">${statusLabels[s.status] || 'فعال'}</span></td></tr>`;
+                });
+
+                // Fee Collection summary for this class
+                const cFees = feeCols.filter(f => cStudents.some(s => s.id === f.studentId));
+                const totalCollected = cFees.reduce((a, b) => a + (b.paid || 0), 0);
+                const expectedMonthly = cStudents.length * (c.monthlyFee || 0);
+                const feeSummary = `<div class="d-flex gap-2 flex-wrap mb-2"><span class="badge bg-success">کل وصول شدہ: Rs ${totalCollected.toLocaleString()}</span><span class="badge bg-info text-dark">ماہانہ متوقع: Rs ${expectedMonthly.toLocaleString()}</span></div>`;
+
+                // Exam Results
+                const cExams = exams.filter(e => e.classId === c.id);
+                const examNames = [...new Set(cExams.map(e => e.examName))];
+                const examSummaryRows = examNames.map(en => {
+                    const exs = cExams.filter(e => e.examName === en);
+                    const avgPct = exs.length ? (exs.reduce((a, b) => a + (b.obtained / (b.total || 100) * 100), 0) / exs.length).toFixed(1) : '0';
+                    const passCount = exs.filter(e => e.result === 'پاس').length;
+                    return `<tr><td>${escapeHtml(en)}</td><td>${exs.length}</td><td>${avgPct}%</td><td><span class="badge-green">${passCount}</span> / <span class="badge-red">${exs.length - passCount}</span></td></tr>`;
+                });
+
+                // Attendance summary per student
+                const cAtt = attendance.filter(a => cStudents.some(s => s.id === a.studentId));
+                const totalP = cAtt.filter(a => a.status === 'ح').length;
+                const totalA = cAtt.filter(a => a.status === 'غ').length;
+                const attSummary = `<div class="d-flex gap-2 flex-wrap"><span class="badge-green">کل حاضر: ${totalP}</span><span class="badge-red">کل غائب: ${totalA}</span><span class="badge bg-info text-dark">کل ریکارڈز: ${cAtt.length}</span></div>`;
+
+                let html = detailSection('school', 'جماعت کی معلومات', info);
+                html += detailSection('users', `طلبا فہرست (${cStudents.length})`, miniTable(['#', 'داخلہ#', 'نام', 'والد', 'حالت'], studentRows));
+                html += detailSection('money-bill-wave', 'فیس وصولی خلاصہ', feeSummary);
+                html += detailSection('pen-nib', `امتحانات خلاصہ (${examNames.length})`, miniTable(['امتحان', 'ریکارڈز', 'اوسط فیصد', 'پاس/فیل'], examSummaryRows));
+                html += detailSection('clipboard-check', 'حاضری خلاصہ', attSummary);
+
+                showEntityDetail(`جماعت: ${escapeHtml(c.name)}`, html);
+            }
+
             async function loadDashboard() {
                 const [students, teachers, classes, feeCols, expenses, attendance, exams, salaries, donations] = await Promise.all([
                     dbGetAll('students'), dbGetAll('teachers'), dbGetAll('classes'),
@@ -3791,9 +4016,35 @@
                 if (!ctx) return;
                 chartInstances[id] = new Chart(ctx.getContext('2d'), { type: 'doughnut', data: { labels, datasets: [{ data, backgroundColor: colors }] }, options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom' } } } });
             }
+            function safeDTDestroy(id) {
+                if (dtInstances[id]) {
+                    try {
+                        dtInstances[id].clear();
+                        dtInstances[id].destroy(false); // false = keep original table in DOM
+                    } catch (e) { }
+                    dtInstances[id] = null;
+                }
+                // Also check via jQuery DataTables API if the table is still initialized
+                try {
+                    if ($.fn.DataTable.isDataTable('#' + id)) {
+                        $('#' + id).DataTable().clear().destroy(false);
+                    }
+                } catch (e) { }
+                // Clean up any leftover DataTables wrapper that may exist
+                const wrapper = document.getElementById(id + '_wrapper');
+                if (wrapper) {
+                    const table = document.getElementById(id);
+                    if (table && wrapper.contains(table)) {
+                        wrapper.parentNode.insertBefore(table, wrapper);
+                    }
+                    wrapper.remove();
+                }
+            }
             function initDT(id) {
-                if (dtInstances[id]) { try { dtInstances[id].destroy(); } catch (e) { } }
-                dtInstances[id] = $('#' + id).DataTable({ responsive: true, language: { url: '', search: 'تلاش:', lengthMenu: '_MENU_ فی صفحہ', info: '_START_ تا _END_ از _TOTAL_', paginate: { next: 'اگلا', previous: 'پچھلا' }, zeroRecords: 'کوئی ریکارڈ نہیں' }, dom: "<'row'<'col-sm-6'l><'col-sm-6'f>><'row'<'col-sm-12'tr>><'row'<'col-sm-5'i><'col-sm-7'p>>", pageLength: 10 });
+                safeDTDestroy(id);
+                const el = document.getElementById(id);
+                if (!el) return;
+                dtInstances[id] = $(el).DataTable({ responsive: true, language: { url: '', search: 'تلاش:', lengthMenu: '_MENU_ فی صفحہ', info: '_START_ تا _END_ از _TOTAL_', paginate: { next: 'اگلا', previous: 'پچھلا' }, zeroRecords: 'کوئی ریکارڈ نہیں' }, dom: "<'row'<'col-sm-6'l><'col-sm-6'f>><'row'<'col-sm-12'tr>><'row'<'col-sm-5'i><'col-sm-7'p>>", pageLength: 10 });
             }
             async function loadStudentsTable() {
                 const classFilter = document.getElementById('filterStudentClass').value;
@@ -3806,14 +4057,14 @@
                 if (classFilter) {
                     filtered = filtered.filter(s => String(s.classId) === String(classFilter));
                 }
-                if (dtInstances['studentsTable']) { dtInstances['studentsTable'].clear().destroy(); }
-                let tbody = document.querySelector('#studentsTable tbody');
-                if (!tbody) { tbody = document.createElement('tbody'); document.getElementById('studentsTable').appendChild(tbody); }
+                safeDTDestroy('studentsTable');
+                const tbody = getOrCreateTbody('studentsTable');
+                if (!tbody) return;
                 const isAdmin = isAdminUser();
                 tbody.innerHTML = filtered.map(s => {
                     const cls = classes.find(c => c.id === s.classId);
                     const statusBadge = s.status === 'withdrawn' ? '<span class="badge-red">دستبردار</span>' : s.status === 'graduated' ? '<span class="badge-gold">فارغ</span>' : s.status === 'suspended' ? '<span class="badge-red">معطل</span>' : '<span class="badge-green">فعال</span>';
-                    const buttons = isAdmin ? `<button class="btn-edit-soft me-1" onclick="editStudent(${s.id})"><i class="fa fa-edit"></i></button><button class="btn-danger-soft" onclick="deleteStudent(${s.id})"><i class="fa fa-trash"></i></button>` : '';
+                    const buttons = `<button class="btn-outline-green btn-sm me-1" onclick="viewStudent(${s.id})" title="تفصیلات"><i class="fa fa-eye"></i></button>` + (isAdmin ? `<button class="btn-edit-soft me-1" onclick="editStudent(${s.id})"><i class="fa fa-edit"></i></button><button class="btn-danger-soft" onclick="deleteStudent(${s.id})"><i class="fa fa-trash"></i></button>` : '');
                     return `<tr class="animate__animated animate__fadeIn"><td>${escapeHtml(s.enrollNo)}</td><td>${escapeHtml(s.name)}</td><td>${escapeHtml(s.fatherName)}</td><td>${cls ? escapeHtml(cls.name) : ''}</td><td>${escapeHtml(s.contact)}</td><td>${statusBadge}</td><td>${s.enrollDate || ''}</td><td>${buttons}</td></tr>`;
                 }).join('');
                 initDT('studentsTable');
@@ -3896,9 +4147,10 @@
             }
             async function loadTeachersTable() {
                 const teachers = await dbGetAll('teachers');
-                if (dtInstances['teachersTable']) { dtInstances['teachersTable'].clear().destroy(); }
-                const tbody = document.querySelector('#teachersTable tbody');
-                tbody.innerHTML = teachers.map(t => `<tr class="animate__animated animate__fadeIn"><td>${t.name || ''}</td><td>${t.subjects || ''}</td><td>${t.mobile || ''}</td><td>Rs ${(t.salary || 0).toLocaleString()}</td><td>${t.appointDate || ''}</td><td>${t.qualification || ''}</td><td><button class="btn-edit-soft me-1" onclick="editTeacher(${t.id})"><i class="fa fa-edit"></i></button><button class="btn-danger-soft" onclick="deleteTeacher(${t.id})"><i class="fa fa-trash"></i></button></td></tr>`).join('');
+                safeDTDestroy('teachersTable');
+                const tbody = getOrCreateTbody('teachersTable');
+                if (!tbody) return;
+                tbody.innerHTML = teachers.map(t => `<tr class="animate__animated animate__fadeIn"><td>${escapeHtml(t.name)}</td><td>${escapeHtml(t.subjects || '')}</td><td>${escapeHtml(t.mobile || '')}</td><td>Rs ${(t.salary || 0).toLocaleString()}</td><td>${t.appointDate || ''}</td><td>${escapeHtml(t.qualification || '')}</td><td><button class="btn-outline-green btn-sm me-1" onclick="viewTeacher(${t.id})" title="تفصیلات"><i class="fa fa-eye"></i></button><button class="btn-edit-soft me-1" onclick="editTeacher(${t.id})"><i class="fa fa-edit"></i></button><button class="btn-danger-soft" onclick="deleteTeacher(${t.id})"><i class="fa fa-trash"></i></button></td></tr>`).join('');
                 initDT('teachersTable');
             }
             async function openTeacherModal(id) {
@@ -3956,12 +4208,13 @@
             }
             async function loadClassesTable() {
                 const [classes, teachers, students] = await Promise.all([dbGetAll('classes'), dbGetAll('teachers'), dbGetAll('students')]);
-                if (dtInstances['classesTable']) { dtInstances['classesTable'].clear().destroy(); }
-                const tbody = document.querySelector('#classesTable tbody');
+                safeDTDestroy('classesTable');
+                const tbody = getOrCreateTbody('classesTable');
+                if (!tbody) return;
                 tbody.innerHTML = classes.map(c => {
                     const t = teachers.find(t => t.id == c.teacher);
                     const sc = students.filter(s => s.classId === c.id).length;
-                    return `<tr class="animate__animated animate__fadeIn"><td>${c.name || ''}</td><td>${t ? t.name : '—'}</td><td>${c.subjects || ''}</td><td>Rs ${(c.monthlyFee || 0).toLocaleString()}</td><td><span class="badge-green">${sc}</span></td><td><button class="btn-edit-soft me-1" onclick="editClass(${c.id})"><i class="fa fa-edit"></i></button><button class="btn-danger-soft" onclick="deleteClass(${c.id})"><i class="fa fa-trash"></i></button></td></tr>`;
+                    return `<tr class="animate__animated animate__fadeIn"><td>${escapeHtml(c.name || '')}</td><td>${t ? escapeHtml(t.name) : '—'}</td><td>${escapeHtml(c.subjects || '')}</td><td>Rs ${(c.monthlyFee || 0).toLocaleString()}</td><td><span class="badge-green">${sc}</span></td><td><button class="btn-outline-green btn-sm me-1" onclick="viewClass(${c.id})" title="تفصیلات"><i class="fa fa-eye"></i></button><button class="btn-edit-soft me-1" onclick="editClass(${c.id})"><i class="fa fa-edit"></i></button><button class="btn-danger-soft" onclick="deleteClass(${c.id})"><i class="fa fa-trash"></i></button></td></tr>`;
                 }).join('');
                 initDT('classesTable');
             }
@@ -4017,8 +4270,9 @@
                 if (classFilter) {
                     filtered = filtered.filter(f => String(f.classId) === String(classFilter));
                 }
-                if (dtInstances['feeStructTable']) { dtInstances['feeStructTable'].clear().destroy(); }
-                const tbody = document.querySelector('#feeStructTable tbody');
+                safeDTDestroy('feeStructTable');
+                const tbody = getOrCreateTbody('feeStructTable');
+                if (!tbody) return;
                 tbody.innerHTML = filtered.map(f => {
                     const cls = classes.find(c => c.id === f.classId);
                     return `<tr class="animate__animated animate__fadeIn"><td>${cls ? cls.name : '—'}</td><td><span class="badge-gold">${f.type || ''}</span></td><td>Rs ${(f.amount || 0).toLocaleString()}</td><td>${f.desc || ''}</td><td><button class="btn-edit-soft me-1" onclick="editFeeStruct(${f.id})"><i class="fa fa-edit"></i></button><button class="btn-danger-soft" onclick="deleteFeeStruct(${f.id})"><i class="fa fa-trash"></i></button></td></tr>`;
@@ -4099,19 +4353,20 @@
                     document.getElementById('feeSummaryYearPaid').textContent = 'Rs ' + yearPaid.toLocaleString();
                     document.getElementById('feeSummary6MonthsPaid').textContent = 'Rs ' + sixMonthsPaid.toLocaleString();
                 }
-                if (dtInstances['feeCollTable']) { dtInstances['feeCollTable'].clear().destroy(); }
-                const tbody = document.querySelector('#feeCollTable tbody');
+                safeDTDestroy('feeCollTable');
+                const tbody = getOrCreateTbody('feeCollTable');
+                if (!tbody) return;
                 tbody.innerHTML = filtered.map(f => {
                     const st = students.find(s => s.id === f.studentId);
                     const cls = classes.find(c => c.id === (st ? st.classId : null));
-                    return `<tr class="animate__animated animate__fadeIn"><td><span class="badge-blue latin">#${f.receiptNo || f.id}</span></td><td>${st ? st.name : '—'}</td><td>${cls ? cls.name : '—'}</td><td><span class="badge-gold">${f.type || ''}</span></td><td>Rs ${(f.paid || 0).toLocaleString()}</td><td>Rs ${(f.discount || 0).toLocaleString()}</td><td>${f.method || ''}</td><td>${f.date || ''}</td><td><button class="btn-edit-soft me-1" onclick="viewReceipt(${f.id})" title="رسید"><i class="fa fa-print"></i></button><button class="btn-danger-soft" onclick="deleteFeeCol(${f.id})"><i class="fa fa-trash"></i></button></td></tr>`;
+                    return `<tr class="animate__animated animate__fadeIn"><td><span class="badge-blue latin">#${f.receiptNo || f.id}</span></td><td>${st ? `<a href="#" onclick="viewStudent(${st.id});return false;" style="color:var(--green-primary);text-decoration:underline">${escapeHtml(st.name)}</a>` : '—'}</td><td>${cls ? escapeHtml(cls.name) : '—'}</td><td><span class="badge-gold">${f.type || ''}</span></td><td>Rs ${(f.paid || 0).toLocaleString()}</td><td>Rs ${(f.discount || 0).toLocaleString()}</td><td>${f.method || ''}</td><td>${f.date || ''}</td><td><button class="btn-edit-soft me-1" onclick="viewReceipt(${f.id})" title="رسید"><i class="fa fa-print"></i></button><button class="btn-danger-soft" onclick="deleteFeeCol(${f.id})"><i class="fa fa-trash"></i></button></td></tr>`;
                 }).join('');
                 initDT('feeCollTable');
             }
             function clearFeeFilter() {
                 document.getElementById('filterFeeFrom').value = '';
                 document.getElementById('filterFeeTo').value = '';
-                try { $('#filterFeeStudent').val('').trigger('change'); } catch(e) {}
+                try { $('#filterFeeStudent').val('').trigger('change'); } catch (e) { }
                 loadFeeCollTable();
             }
             async function openFeeCollModal() {
@@ -4240,11 +4495,12 @@
             }
             async function loadSalaryTable() {
                 const [salaries, teachers] = await Promise.all([dbGetAll('salaries'), dbGetAll('teachers')]);
-                if (dtInstances['salaryTable']) { dtInstances['salaryTable'].clear().destroy(); }
-                const tbody = document.querySelector('#salaryTable tbody');
+                safeDTDestroy('salaryTable');
+                const tbody = getOrCreateTbody('salaryTable');
+                if (!tbody) return;
                 tbody.innerHTML = salaries.map(s => {
                     const t = teachers.find(t => t.id === s.teacherId);
-                    return `<tr class="animate__animated animate__fadeIn"><td><span class="badge-blue latin">#${s.slipId || s.id}</span></td><td>${t ? t.name : '—'}</td><td>${s.month || ''}</td><td>Rs ${(s.fixedSalary || 0).toLocaleString()}</td><td>Rs ${(s.paid || 0).toLocaleString()}</td><td>Rs ${(s.balance || 0).toLocaleString()}</td><td>${s.date || ''}</td><td><button class="btn-edit-soft me-1" onclick="viewSalSlip(${s.id})" title="سلپ"><i class="fa fa-print"></i></button><button class="btn-danger-soft" onclick="deleteSalary(${s.id})"><i class="fa fa-trash"></i></button></td></tr>`;
+                    return `<tr class="animate__animated animate__fadeIn"><td><span class="badge-blue latin">#${s.slipId || s.id}</span></td><td>${t ? `<a href="#" onclick="viewTeacher(${t.id});return false;" style="color:var(--green-primary);text-decoration:underline">${escapeHtml(t.name)}</a>` : '—'}</td><td>${s.month || ''}</td><td>Rs ${(s.fixedSalary || 0).toLocaleString()}</td><td>Rs ${(s.paid || 0).toLocaleString()}</td><td>Rs ${(s.balance || 0).toLocaleString()}</td><td>${s.date || ''}</td><td><button class="btn-edit-soft me-1" onclick="viewSalSlip(${s.id})" title="سلپ"><i class="fa fa-print"></i></button><button class="btn-danger-soft" onclick="deleteSalary(${s.id})"><i class="fa fa-trash"></i></button></td></tr>`;
                 }).join('');
                 initDT('salaryTable');
             }
@@ -4339,8 +4595,9 @@
                 if (from) expenses = expenses.filter(e => e.date >= from);
                 if (to) expenses = expenses.filter(e => e.date <= to);
                 if (cat) expenses = expenses.filter(e => e.category === cat);
-                if (dtInstances['expensesTable']) { dtInstances['expensesTable'].clear().destroy(); }
-                const tbody = document.querySelector('#expensesTable tbody');
+                safeDTDestroy('expensesTable');
+                const tbody = getOrCreateTbody('expensesTable');
+                if (!tbody) return;
                 tbody.innerHTML = expenses.map(e => `<tr class="animate__animated animate__fadeIn"><td>${e.date || ''}</td><td><span class="badge-gold">${e.category || ''}</span></td><td>Rs ${(e.amount || 0).toLocaleString()}</td><td>${e.paidTo || '—'}</td><td>${e.detail || ''}</td><td><button class="btn-edit-soft me-1" onclick="editExpense(${e.id})"><i class="fa fa-edit"></i></button><button class="btn-danger-soft" onclick="deleteExpense(${e.id})"><i class="fa fa-trash"></i></button></td></tr>`).join('');
                 initDT('expensesTable');
             }
@@ -4408,10 +4665,11 @@
             async function loadAttendance() {
                 const clsId = document.getElementById('attClassFilter').value;
                 const date = document.getElementById('attDate').value || today();
-                if (!clsId) { document.getElementById('attBody').innerHTML = '<tr><td colspan="6" class="text-center text-muted">جماعت منتخب کریں</td></tr>'; return; }
+                if (!clsId) { const ab = document.getElementById('attBody'); if (ab) ab.innerHTML = '<tr><td colspan="6" class="text-center text-muted">جماعت منتخب کریں</td></tr>'; return; }
                 const [students, attendance] = await Promise.all([dbGetAll('students'), dbGetAll('attendance')]);
                 const clsStudents = students.filter(s => String(s.classId) === String(clsId));
                 const tbody = document.getElementById('attBody');
+                if (!tbody) return;
                 const symP = currentAttSymbolMode === 'letters' ? 'ح' : '✓';
                 const symA = currentAttSymbolMode === 'letters' ? 'غ' : '✗';
                 const symL = currentAttSymbolMode === 'letters' ? 'ر' : '—';
@@ -4473,6 +4731,7 @@
                 const symA = currentAttSymbolMode === 'letters' ? 'غ' : '✗';
                 const symL = currentAttSymbolMode === 'letters' ? 'ر' : '—';
                 const body = document.getElementById('monthlyAttBody');
+                if (!body) return;
                 body.innerHTML = clsStudents.map(s => {
                     let p = 0, a = 0, l = 0;
                     const cells = days.map(d => {
@@ -4489,6 +4748,7 @@
             async function loadPromoStudentsPreview() {
                 const sourceId = document.getElementById('promoSourceClass').value;
                 const tbody = document.getElementById('promoPreviewBody');
+                if (!tbody) return;
                 if (!sourceId) { tbody.innerHTML = '<tr><td colspan="3" class="text-center">کوئی جماعت منتخب نہیں</td></tr>'; return; }
                 const students = await dbGetAll('students');
                 const classes = await dbGetAll('classes');
@@ -4560,8 +4820,9 @@
                 const [students, classes] = await Promise.all([dbGetAll('students'), dbGetAll('classes')]);
                 if (clsFilter) exams = exams.filter(e => String(e.classId) === String(clsFilter));
                 if (nameFilter) exams = exams.filter(e => e.examName && e.examName.toLowerCase().includes(nameFilter));
-                if (dtInstances['examsTable']) { dtInstances['examsTable'].clear().destroy(); }
-                const tbody = document.querySelector('#examsTable tbody');
+                safeDTDestroy('examsTable');
+                const tbody = getOrCreateTbody('examsTable');
+                if (!tbody) return;
                 tbody.innerHTML = exams.map(e => {
                     const st = students.find(s => s.id === e.studentId);
                     const cls = classes.find(c => c.id === e.classId);
@@ -4762,6 +5023,7 @@
                 const teachers = await dbGetAll('teachers');
                 const staffAtt = await dbGetAll('staffattendance');
                 const tbody = document.getElementById('staffAttBody');
+                if (!tbody) return;
                 tbody.innerHTML = teachers.map(t => {
                     const existing = staffAtt.find(a => a.teacherId === t.id && a.date === date);
                     const status = existing ? existing.status : '';
@@ -4799,8 +5061,9 @@
             }
             async function loadInventoryTable() {
                 const items = await dbGetAll('inventory');
-                if (dtInstances['inventoryTable']) { dtInstances['inventoryTable'].clear().destroy(); }
-                const tbody = document.querySelector('#inventoryTable tbody');
+                safeDTDestroy('inventoryTable');
+                const tbody = getOrCreateTbody('inventoryTable');
+                if (!tbody) return;
                 tbody.innerHTML = items.map(i => `<tr class="animate__animated animate__fadeIn"><td>${i.name || ''}</td><td>${i.category || ''}</td><td>${i.qty || 0}</td><td>Rs ${(i.unitPrice || 0).toLocaleString()}</td><td>Rs ${(i.totalPrice || 0).toLocaleString()}</td><td>${i.date || ''}</td><td>${i.desc || ''}</td><td><button class="btn-edit-soft me-1" onclick="editInventory(${i.id})"><i class="fa fa-edit"></i></button><button class="btn-danger-soft" onclick="deleteInventory(${i.id})"><i class="fa fa-trash"></i></button></td></tr>`).join('');
                 initDT('inventoryTable');
             }
@@ -5133,11 +5396,12 @@
             }
             async function loadFinesTable() {
                 const [fines, students] = await Promise.all([dbGetAll('fines'), dbGetAll('students')]);
-                if (dtInstances['finesTable']) { dtInstances['finesTable'].clear().destroy(); }
+                safeDTDestroy('finesTable');
                 const tbody = document.getElementById('finesBody');
+                if (!tbody) return;
                 tbody.innerHTML = fines.map(f => {
                     const st = students.find(s => s.id === f.studentId);
-                    return `<tr class="animate__animated animate__fadeIn"><td>${st ? st.name : '—'}</td><td>${f.type || ''}</td><td>Rs ${(f.amount || 0).toLocaleString()}</td><td><span class="badge-${f.status === 'paid' ? 'green' : 'red'}">${f.status === 'paid' ? 'ادا شدہ' : 'باقی'}</span></td><td>${f.date || ''}</td><td>${f.desc || ''}</td><td><button class="btn-edit-soft me-1" onclick="openFineModal(${f.id})"><i class="fa fa-edit"></i></button><button class="btn-danger-soft" onclick="deleteFine(${f.id})"><i class="fa fa-trash"></i></button></td></tr>`;
+                    return `<tr class="animate__animated animate__fadeIn"><td>${st ? `<a href="#" onclick="viewStudent(${st.id});return false;" style="color:var(--green-primary);text-decoration:underline">${escapeHtml(st.name)}</a>` : '—'}</td><td>${escapeHtml(f.type || '')}</td><td>Rs ${(f.amount || 0).toLocaleString()}</td><td><span class="badge-${f.status === 'paid' ? 'green' : 'red'}">${f.status === 'paid' ? 'ادا شدہ' : 'باقی'}</span></td><td>${f.date || ''}</td><td>${escapeHtml(f.desc || '')}</td><td><button class="btn-edit-soft me-1" onclick="openFineModal(${f.id})"><i class="fa fa-edit"></i></button><button class="btn-danger-soft" onclick="deleteFine(${f.id})"><i class="fa fa-trash"></i></button></td></tr>`;
                 }).join('');
                 initDT('finesTable');
             }
@@ -5229,8 +5493,9 @@
                 const cat = document.getElementById('filterDonationCat').value;
                 let donations = await dbGetAll('donations');
                 if (cat) donations = donations.filter(d => d.category === cat);
-                if (dtInstances['donationsTable']) { dtInstances['donationsTable'].clear().destroy(); }
+                safeDTDestroy('donationsTable');
                 const tbody = document.getElementById('donationsBody');
+                if (!tbody) return;
                 tbody.innerHTML = donations.map(d => `<tr class="animate__animated animate__fadeIn"><td><span class="badge-blue latin">#${d.receiptNo || d.id}</span></td><td>${escapeHtml(d.donor)}</td><td><span class="badge-gold">${escapeHtml(d.category || '')}</span></td><td>Rs ${(d.amount || 0).toLocaleString()}</td><td>${escapeHtml(d.mobile || '')}</td><td>${d.date || ''}</td><td><button class="btn-edit-soft me-1" onclick="printDonationReceipt(${d.id})" title="رسید پرنٹ"><i class="fa fa-print"></i></button><button class="btn-edit-soft me-1" onclick="openDonationModal(${d.id})"><i class="fa fa-edit"></i></button><button class="btn-danger-soft" onclick="deleteDonation(${d.id})"><i class="fa fa-trash"></i></button></td></tr>`).join('');
                 initDT('donationsTable');
             }
@@ -5300,14 +5565,15 @@
             }
             async function loadLibraryTable() {
                 const [library, students] = await Promise.all([dbGetAll('library'), dbGetAll('students')]);
-                if (dtInstances['libraryTable']) { dtInstances['libraryTable'].clear().destroy(); }
+                safeDTDestroy('libraryTable');
                 const tbody = document.getElementById('libraryBody');
+                if (!tbody) return;
                 tbody.innerHTML = library.map(l => {
                     const st = students.find(s => s.id === l.studentId);
                     const isOverdue = l.status !== 'returned' && l.dueDate && l.dueDate < today();
                     const daysLate = isOverdue ? Math.ceil((new Date(today()) - new Date(l.dueDate)) / 86400000) : 0;
                     const statusLabel = l.status === 'returned' ? '<span class="badge-green">واپس شدہ</span>' : isOverdue ? `<span class="badge-red">میعاد گزری (${daysLate} دن)</span>` : '<span class="badge-gold">جاری کردہ</span>';
-                    return `<tr class="animate__animated animate__fadeIn"><td>${escapeHtml(l.bookName)}</td><td>${st ? escapeHtml(st.name) : '—'}</td><td>${l.issueDate || ''}</td><td>${l.dueDate || ''}</td><td>${statusLabel}</td><td><button class="btn-edit-soft me-1" onclick="openLibraryModal(${l.id})"><i class="fa fa-edit"></i></button><button class="btn-danger-soft" onclick="deleteLibrary(${l.id})"><i class="fa fa-trash"></i></button></td></tr>`;
+                    return `<tr class="animate__animated animate__fadeIn"><td>${escapeHtml(l.bookName)}</td><td>${st ? `<a href="#" onclick="viewStudent(${st.id});return false;" style="color:var(--green-primary);text-decoration:underline">${escapeHtml(st.name)}</a>` : '—'}</td><td>${l.issueDate || ''}</td><td>${l.dueDate || ''}</td><td>${statusLabel}</td><td><button class="btn-edit-soft me-1" onclick="openLibraryModal(${l.id})"><i class="fa fa-edit"></i></button><button class="btn-danger-soft" onclick="deleteLibrary(${l.id})"><i class="fa fa-trash"></i></button></td></tr>`;
                 }).join('');
                 initDT('libraryTable');
             }
@@ -5351,11 +5617,12 @@
             }
             async function loadHostelTable() {
                 const [hostel, students] = await Promise.all([dbGetAll('hostel'), dbGetAll('students')]);
-                if (dtInstances['hostelTable']) { dtInstances['hostelTable'].clear().destroy(); }
+                safeDTDestroy('hostelTable');
                 const tbody = document.getElementById('hostelBody');
+                if (!tbody) return;
                 tbody.innerHTML = hostel.map(h => {
                     const st = students.find(s => s.id === h.studentId);
-                    return `<tr class="animate__animated animate__fadeIn"><td>${st ? escapeHtml(st.name) : '—'}</td><td>${escapeHtml(h.room || '')}</td><td><span class="badge-${h.residentStatus === 'active' ? 'green' : 'red'}">${h.residentStatus === 'active' ? 'مقیم' : 'چھوڑ چکا'}</span></td><td>Rs ${(h.messFee || 0).toLocaleString()}</td><td><span class="badge-${h.feeStatus === 'paid' ? 'green' : 'red'}">${h.feeStatus === 'paid' ? 'ادا شدہ' : 'باقی'}</span></td><td>${h.checkInDate || '—'}</td><td>${h.checkOutDate || '—'}</td><td><button class="btn-edit-soft me-1" onclick="openHostelModal(${h.id})"><i class="fa fa-edit"></i></button><button class="btn-danger-soft" onclick="deleteHostel(${h.id})"><i class="fa fa-trash"></i></button></td></tr>`;
+                    return `<tr class="animate__animated animate__fadeIn"><td>${st ? `<a href="#" onclick="viewStudent(${st.id});return false;" style="color:var(--green-primary);text-decoration:underline">${escapeHtml(st.name)}</a>` : '—'}</td><td>${escapeHtml(h.room || '')}</td><td><span class="badge-${h.residentStatus === 'active' ? 'green' : 'red'}">${h.residentStatus === 'active' ? 'مقیم' : 'چھوڑ چکا'}</span></td><td>Rs ${(h.messFee || 0).toLocaleString()}</td><td><span class="badge-${h.feeStatus === 'paid' ? 'green' : 'red'}">${h.feeStatus === 'paid' ? 'ادا شدہ' : 'باقی'}</span></td><td>${h.checkInDate || '—'}</td><td>${h.checkOutDate || '—'}</td><td><button class="btn-edit-soft me-1" onclick="openHostelModal(${h.id})"><i class="fa fa-edit"></i></button><button class="btn-danger-soft" onclick="deleteHostel(${h.id})"><i class="fa fa-trash"></i></button></td></tr>`;
                 }).join('');
                 initDT('hostelTable');
             }
@@ -5642,6 +5909,7 @@
             async function loadTeacherDutyRoster() {
                 const tid = document.getElementById('rosterTeacherSelect').value;
                 const tbody = document.getElementById('dutyRosterBody');
+                if (!tbody) return;
                 if (!tid) { tbody.innerHTML = '<tr><td colspan="4" class="text-center">استاد منتخب کریں</td></tr>'; return; }
                 const teacher = await dbGet('teachers', parseInt(tid));
                 if (!teacher) return;
@@ -5673,7 +5941,9 @@
             function printDutyRoster() {
                 const tid = document.getElementById('rosterTeacherSelect').value;
                 if (!tid) { showToast('error', 'پہلے استاد منتخب کریں'); return; }
-                const content = document.getElementById('dutyRosterBody').parentElement.outerHTML;
+                const drBody = document.getElementById('dutyRosterBody');
+                if (!drBody) { showToast('error', 'پہلے ڈیوٹی روسٹر لوڈ کریں'); return; }
+                const content = drBody.parentElement.outerHTML;
                 const sel = document.getElementById('rosterTeacherSelect');
                 const teacherName = sel.options[sel.selectedIndex].text;
                 document.getElementById('printArea').innerHTML = `
@@ -6047,8 +6317,8 @@
             setTimeout(gdRestoreUIState, 1000);
             document.addEventListener('DOMContentLoaded', () => main());
         </script>
-
-</div><script type="module">
+</div>
+<script type="module">
   import { Workbox } from 'https://storage.googleapis.com/workbox-cdn/releases/7.0.0/workbox-window.prod.mjs';
 
   const swUrl = './sw.js';

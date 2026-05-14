@@ -61,16 +61,8 @@ if (workbox) {
         "revision": "912a9d55d74613b8f4f07180d0df1fd3"
     },
     {
-        "url": "GITHUB_SECURITY_GUIDE.md",
-        "revision": "8443f4f552cfc6fae4086c2b913058d4"
-    },
-    {
-        "url": "GOOGLE_DRIVE_SETUP.md",
-        "revision": "1f6bc70feffe556298195be77ef39ad7"
-    },
-    {
         "url": "index.html",
-        "revision": "f1617c6b2cfe91e47ea52e9bbf7ba525"
+        "revision": "c1a70ee33aa652f859f0d0fb14045f48"
     },
     {
         "url": "manifest.json",
@@ -82,7 +74,7 @@ if (workbox) {
     },
     {
         "url": "sw.js",
-        "revision": "3ad62e7e3d60c1155d49ea25952b0807"
+        "revision": "d30be3c10590d5004e030242deecd60a"
     }
 ]);
 
