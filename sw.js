@@ -53,24 +53,40 @@ if (workbox) {
         "revision": "05bdb783ee6514c8c072e47680af8ff7"
     },
     {
+        "url": ".gitignore",
+        "revision": "0ad8281b52754ab07f41b3b836234ab4"
+    },
+    {
         "url": "build pwa make html app offline and installable yasin best working re-run this for updates best for html only.pyw",
         "revision": "912a9d55d74613b8f4f07180d0df1fd3"
     },
     {
+        "url": "GITHUB_SECURITY_GUIDE.md",
+        "revision": "8443f4f552cfc6fae4086c2b913058d4"
+    },
+    {
+        "url": "GOOGLE_DRIVE_SETUP.md",
+        "revision": "1f6bc70feffe556298195be77ef39ad7"
+    },
+    {
         "url": "index.html",
-        "revision": "7fab8720607e58d0f421694414d336dc"
+        "revision": "fadb4aaf36972b544865bd31eda7949d"
     },
     {
         "url": "madrasa_management_indexeddb.html",
-        "revision": "8dfa6270b18f2c94f13da004ee51a2cc"
+        "revision": "edd3f7cf91fe8dae74075c7c11a6f764"
+    },
+    {
+        "url": "manifest.json",
+        "revision": "8c8790cc26edba6e2e0dd6719861eb9a"
     },
     {
         "url": "offline.html",
-        "revision": "7656c61e25225c4fcc77cb000be6d527"
+        "revision": "8987c4b748db7cbdf5e4c6165507121b"
     },
     {
-        "url": "PLAN.md",
-        "revision": "3a214594b4da1da3d70d6a949f4827e9"
+        "url": "sw.js",
+        "revision": "105ec2825de518e6417d11e727fd6f51"
     }
 ]);
 
