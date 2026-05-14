@@ -1279,6 +1279,7 @@
                                             <th>والد کا نام</th>
                                             <th>جماعت</th>
                                             <th>رابطہ</th>
+                                            <th>حالت</th>
                                             <th>تاریخ داخلہ</th>
                                             <th>عمل</th>
                                         </tr>
@@ -1789,6 +1790,9 @@
                                         <option value="salaryPayments">تنخواہ ادائیگی</option>
                                         <option value="attendanceSummary">حاضری خلاصہ</option>
                                         <option value="donations">عطیات و زکوٰۃ رپورٹ</option>
+                                        <option value="inventory">انوینٹری رپورٹ</option>
+                                        <option value="libraryOverdue">زیر التواء کتابیں (Overdue Books)</option>
+                                        <option value="hostelReport">ہاسٹل رپورٹ</option>
                                     </select>
                                 </div>
                                 <div class="col-6 col-md-3">
@@ -1976,6 +1980,8 @@
                                             <th>رہائشی حالت</th>
                                             <th>میس فیس (Mess Fee)</th>
                                             <th>ادائیگی حالت</th>
+                                            <th>داخلہ</th>
+                                            <th>اخراج</th>
                                             <th>عمل</th>
                                         </tr>
                                     </thead>
@@ -2093,6 +2099,28 @@
                                             <td class="text-muted text-center p-3" colspan="3">پہلے موجودہ جماعت منتخب
                                                 کریں</td>
                                         </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="section-card animate__animated animate__fadeInUp mt-3">
+                        <div class="sc-head">
+                            <h4><i class="fa fa-history text-success me-1"></i> ترقی کی تاریخ (Promotion History)</h4>
+                        </div>
+                        <div class="sc-body">
+                            <div class="table-responsive">
+                                <table class="table table-sm table-bordered">
+                                    <thead>
+                                        <tr style="background:var(--green-light)">
+                                            <th>طالب علم</th>
+                                            <th>سابقہ جماعت</th>
+                                            <th>نئی جماعت</th>
+                                            <th>تاریخ</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="promoHistoryBody">
+                                        <tr><td colspan="4" class="text-center text-muted p-3">کوئی تاریخ نہیں</td></tr>
                                     </tbody>
                                 </table>
                             </div>
@@ -2237,7 +2265,7 @@
                                 </div>
                                 <div class="sc-body">
                                     <div class="row g-2 align-items-center">
-                                        <div class="col-12 col-md-8">
+                                        <div class="col-12 col-md-6">
                                             <div class="alert alert-warning py-1 px-2 mb-2" style="font-size:.78rem">
                                                 <i class="fa fa-info-circle me-1"></i> <strong>نوٹ:</strong> امپورٹ کرنے
                                                 سے موجودہ ڈیٹا مٹ سکتا ہے۔ پہلے بیک اپ ضرور بنا لیں۔
@@ -2326,6 +2354,33 @@
                             </div>
                         </div>
                     </div>
+                    <div class="section-card animate__animated animate__fadeInUp mt-3">
+                        <div class="sc-head">
+                            <h4><i class="fa fa-history text-success me-1"></i> آڈٹ لاگ (Audit Log)</h4>
+                        </div>
+                        <div class="sc-body">
+                            <div class="table-responsive" style="max-height:350px;overflow-y:auto">
+                                <table class="table table-sm table-bordered">
+                                    <thead>
+                                        <tr style="background:var(--green-light)">
+                                            <th>صارف</th>
+                                            <th>کردار</th>
+                                            <th>عمل</th>
+                                            <th>ماڈیول</th>
+                                            <th>تفصیل</th>
+                                            <th>وقت</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="auditLogBody">
+                                        <tr><td colspan="6" class="text-center text-muted">لوڈ ہو رہا ہے...</td></tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                            <button class="btn-outline-green btn-sm mt-2" onclick="clearAuditLog()">
+                                <i class="fa fa-trash"></i> لاگ صاف کریں
+                            </button>
+                        </div>
+                    </div>
                 </div>
                 <footer
                     style="background:#fff;border-top:1px solid #e5ebe7;padding:.75rem 1.5rem;text-align:center;font-size:.75rem;color:#6b8c72">
@@ -2382,6 +2437,48 @@
                                 <div class="col-12 col-md-4">
                                     <label>رابطہ نمبر</label>
                                     <input class="form-control" id="sContact" placeholder="03xxxxxxxxx" type="text" />
+                                </div>
+                                <div class="col-12 col-md-4">
+                                    <label>جنس</label>
+                                    <select class="form-select" id="sGender">
+                                        <option value="مرد">مرد (Male)</option>
+                                        <option value="عورت">عورت (Female)</option>
+                                    </select>
+                                </div>
+                                <div class="col-12 col-md-4">
+                                    <label>تاریخ پیدائش</label>
+                                    <input class="form-control" id="sDOB" type="date" />
+                                </div>
+                                <div class="col-12 col-md-4">
+                                    <label>بلڈ گروپ</label>
+                                    <select class="form-select" id="sBloodGroup">
+                                        <option value="">منتخب کریں</option>
+                                        <option>A+</option><option>A-</option>
+                                        <option>B+</option><option>B-</option>
+                                        <option>AB+</option><option>AB-</option>
+                                        <option>O+</option><option>O-</option>
+                                    </select>
+                                </div>
+                                <div class="col-12 col-md-4">
+                                    <label>سرپرست / ولی کا نام</label>
+                                    <input class="form-control" id="sGuardianName" placeholder="اگر والد سے مختلف ہو" type="text" />
+                                </div>
+                                <div class="col-12 col-md-4">
+                                    <label>ایمرجنسی رابطہ</label>
+                                    <input class="form-control" id="sEmergencyContact" placeholder="03xxxxxxxxx" type="text" />
+                                </div>
+                                <div class="col-12 col-md-4">
+                                    <label>حالت</label>
+                                    <select class="form-select" id="sStatus">
+                                        <option value="active">فعال (Active)</option>
+                                        <option value="withdrawn">دستبردار (Withdrawn)</option>
+                                        <option value="graduated">فارغ التحصیل (Graduated)</option>
+                                        <option value="suspended">معطل (Suspended)</option>
+                                    </select>
+                                </div>
+                                <div class="col-12 col-md-4">
+                                    <label>سابقہ تعلیم</label>
+                                    <input class="form-control" id="sPrevEducation" placeholder="مثلاً: حفظ مکمل" type="text" />
                                 </div>
                                 <div class="col-12">
                                     <label>پتہ</label>
@@ -3144,6 +3241,14 @@
                                         <option value="unpaid">باقی (Unpaid)</option>
                                     </select>
                                 </div>
+                                <div class="col-6">
+                                    <label>داخلہ تاریخ (Check-in)</label>
+                                    <input class="form-control" id="hsCheckInDate" type="date" />
+                                </div>
+                                <div class="col-6">
+                                    <label>اخراج تاریخ (Check-out)</label>
+                                    <input class="form-control" id="hsCheckOutDate" type="date" />
+                                </div>
                             </div>
                         </form>
                     </div>
@@ -3209,8 +3314,8 @@
         <script src="https://cdn.jsdelivr.net/npm/just-validate@4.3.0/dist/just-validate.production.min.js"></script>
         <script>
             const DB_NAME = 'MadrasaMgmt';
-            const DB_VER = 2;
-            const STORES = ['users', 'students', 'teachers', 'classes', 'feestructures', 'feecollections', 'salaries', 'expenses', 'attendance', 'staffattendance', 'exams', 'timetable', 'inventory', 'settings', 'library', 'libraryIssues', 'hostel', 'hostelAllocations', 'fines', 'certificates', 'donations', 'promotions', 'academicYears'];
+            const DB_VER = 3;
+            const STORES = ['users', 'students', 'teachers', 'classes', 'feestructures', 'feecollections', 'salaries', 'expenses', 'attendance', 'staffattendance', 'exams', 'timetable', 'inventory', 'settings', 'library', 'libraryIssues', 'hostel', 'hostelAllocations', 'fines', 'certificates', 'donations', 'promotions', 'academicYears', 'auditlog', 'bookcatalog', 'counters'];
             let db;
             let currentUser = null;
             let idleTimer = null;
@@ -3325,6 +3430,32 @@
             }
             function validatePassword(pwd) {
                 return pwd.length >= 8 && /[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(pwd);
+            }
+            function escapeHtml(str) {
+                if (!str) return '';
+                const d = document.createElement('div');
+                d.appendChild(document.createTextNode(String(str)));
+                return d.innerHTML;
+            }
+            function calcFeeNet() {
+                const due = parseFloat(document.getElementById('fcDue').value) || 0;
+                const discount = parseFloat(document.getElementById('fcDiscount').value) || 0;
+                const paid = parseFloat(document.getElementById('fcPaid').value) || 0;
+                document.getElementById('fcNetDue').value = Math.max(0, due - discount - paid);
+            }
+            async function getNextCounter(name) {
+                const counters = await dbGetAll('counters');
+                let counter = counters.find(c => c.name === name);
+                if (!counter) { const id = await dbAdd('counters', { name, value: 1 }); return 1; }
+                counter.value++;
+                await dbPut('counters', counter);
+                return counter.value;
+            }
+            async function addAuditLog(action, module, detail) {
+                if (!currentUser) return;
+                try {
+                    await dbAdd('auditlog', { user: currentUser.username, role: currentUser.role, action, module, detail: typeof detail === 'string' ? detail : JSON.stringify(detail), timestamp: new Date().toISOString() });
+                } catch(e) {}
             }
             async function seedData() {
                 const users = await dbGetAll('users');
@@ -3687,7 +3818,7 @@
                     case 'certificates': loadCertificatesPage(); break;
                     case 'promotions': loadPromotionsPage(); break;
                     case 'reports': loadReport(); break;
-                    case 'settings': loadUsersTable(); break;
+                    case 'settings': loadUsersTable(); loadAuditLog(); break;
                 }
                 return false;
             }
@@ -3812,8 +3943,9 @@
                 const isAdmin = isAdminUser();
                 tbody.innerHTML = filtered.map(s => {
                     const cls = classes.find(c => c.id === s.classId);
+                    const statusBadge = s.status === 'withdrawn' ? '<span class="badge-red">دستبردار</span>' : s.status === 'graduated' ? '<span class="badge-gold">فارغ</span>' : s.status === 'suspended' ? '<span class="badge-red">معطل</span>' : '<span class="badge-green">فعال</span>';
                     const buttons = isAdmin ? `<button class="btn-edit-soft me-1" onclick="editStudent(${s.id})"><i class="fa fa-edit"></i></button><button class="btn-danger-soft" onclick="deleteStudent(${s.id})"><i class="fa fa-trash"></i></button>` : '';
-                    return `<tr class="animate__animated animate__fadeIn"><td>${s.enrollNo || ''}</td><td>${s.name || ''}</td><td>${s.fatherName || ''}</td><td>${cls ? cls.name : ''}</td><td>${s.contact || ''}</td><td>${s.enrollDate || ''}</td><td>${buttons}</td></tr>`;
+                    return `<tr class="animate__animated animate__fadeIn"><td>${escapeHtml(s.enrollNo)}</td><td>${escapeHtml(s.name)}</td><td>${escapeHtml(s.fatherName)}</td><td>${cls ? escapeHtml(cls.name) : ''}</td><td>${escapeHtml(s.contact)}</td><td>${statusBadge}</td><td>${s.enrollDate || ''}</td><td>${buttons}</td></tr>`;
                 }).join('');
                 initDT('studentsTable');
             }
@@ -3840,6 +3972,13 @@
                         document.getElementById('sEnrollDate').value = s.enrollDate || '';
                         document.getElementById('sContact').value = s.contact || '';
                         document.getElementById('sAddress').value = s.address || '';
+                        document.getElementById('sGender').value = s.gender || 'مرد';
+                        document.getElementById('sDOB').value = s.dob || '';
+                        document.getElementById('sBloodGroup').value = s.bloodGroup || '';
+                        document.getElementById('sGuardianName').value = s.guardianName || '';
+                        document.getElementById('sEmergencyContact').value = s.emergencyContact || '';
+                        document.getElementById('sStatus').value = s.status || 'active';
+                        document.getElementById('sPrevEducation').value = s.prevEducation || '';
                         document.getElementById('sPhotoBase64').value = s.photo || '';
                         document.getElementById('sPhotoPreview').src = s.photo || '';
                         document.getElementById('sPhotoPreview').style.display = s.photo ? 'block' : 'none';
@@ -3864,18 +4003,26 @@
                 const contact = document.getElementById('sContact').value.trim();
                 const address = document.getElementById('sAddress').value.trim();
                 const photo = document.getElementById('sPhotoBase64').value;
+                const gender = document.getElementById('sGender').value;
+                const dob = document.getElementById('sDOB').value;
+                const bloodGroup = document.getElementById('sBloodGroup').value;
+                const guardianName = document.getElementById('sGuardianName').value.trim();
+                const emergencyContact = document.getElementById('sEmergencyContact').value.trim();
+                const status = document.getElementById('sStatus').value;
+                const prevEducation = document.getElementById('sPrevEducation').value.trim();
                 if (!enrollNo || !name || !fatherName || !classId) { showToast('error', 'نشاندہی شدہ فیلڈز ضروری ہیں'); return; }
-                const data = { enrollNo, name, fatherName, classId, enrollDate, contact, address, photo };
-                if (id) { await dbPut('students', { ...data, id: parseInt(id) }); }
-                else { await dbAdd('students', data); }
+                const data = { enrollNo, name, fatherName, classId, enrollDate, contact, address, photo, gender, dob, bloodGroup, guardianName, emergencyContact, status, prevEducation };
+                if (id) { await dbPut('students', { ...data, id: parseInt(id) }); await addAuditLog('ترمیم', 'طلبا', name); }
+                else { await dbAdd('students', data); await addAuditLog('اضافہ', 'طلبا', name); }
                 bootstrap.Modal.getInstance(document.getElementById('studentModal')).hide();
                 showToast('success', 'طالب علم محفوظ ہو گیا');
                 await loadStudentsTable();
                 await populateAllSelects();
             }
             async function deleteStudent(id) {
+                if (!ensureAdminAccess('طالب علم حذف')) return;
                 Swal.fire({ title: 'طالب علم حذف کریں؟', text: 'یہ عمل واپس نہیں ہو سکتا', icon: 'warning', showCancelButton: true, confirmButtonText: 'ہاں، حذف کریں', cancelButtonText: 'منسوخ', confirmButtonColor: '#c0392b' }).then(async r => {
-                    if (r.isConfirmed) { await dbDelete('students', id); showToast('success', 'طالب علم حذف ہو گیا'); await loadStudentsTable(); await populateAllSelects(); }
+                    if (r.isConfirmed) { const s = await dbGet('students', id); await dbDelete('students', id); await addAuditLog('حذف', 'طلبا', s ? s.name : id); showToast('success', 'طالب علم حذف ہو گیا'); await loadStudentsTable(); await populateAllSelects(); }
                 });
             }
             async function loadTeachersTable() {
@@ -3933,8 +4080,9 @@
                 await populateAllSelects();
             }
             async function deleteTeacher(id) {
+                if (!ensureAdminAccess('استاد حذف')) return;
                 Swal.fire({ title: 'استاد حذف کریں؟', icon: 'warning', showCancelButton: true, confirmButtonText: 'ہاں', cancelButtonText: 'نہیں', confirmButtonColor: '#c0392b' }).then(async r => {
-                    if (r.isConfirmed) { await dbDelete('teachers', id); showToast('success', 'استاد حذف ہو گیا'); await loadTeachersTable(); await populateAllSelects(); }
+                    if (r.isConfirmed) { const t = await dbGet('teachers', id); await dbDelete('teachers', id); await addAuditLog('حذف', 'اساتذہ', t ? t.name : id); showToast('success', 'استاد حذف ہو گیا'); await loadTeachersTable(); await populateAllSelects(); }
                 });
             }
             async function loadClassesTable() {
@@ -3988,8 +4136,9 @@
                 await populateAllSelects();
             }
             async function deleteClass(id) {
+                if (!ensureAdminAccess('جماعت حذف')) return;
                 Swal.fire({ title: 'جماعت حذف کریں؟', icon: 'warning', showCancelButton: true, confirmButtonText: 'ہاں', cancelButtonText: 'نہیں', confirmButtonColor: '#c0392b' }).then(async r => {
-                    if (r.isConfirmed) { await dbDelete('classes', id); showToast('success', 'جماعت حذف ہو گئی'); await loadClassesTable(); await populateAllSelects(); }
+                    if (r.isConfirmed) { const c = await dbGet('classes', id); await dbDelete('classes', id); await addAuditLog('حذف', 'جماعتیں', c ? c.name : id); showToast('success', 'جماعت حذف ہو گئی'); await loadClassesTable(); await populateAllSelects(); }
                 });
             }
             async function loadFeeStructTable() {
@@ -4093,6 +4242,7 @@
             function clearFeeFilter() {
                 document.getElementById('filterFeeFrom').value = '';
                 document.getElementById('filterFeeTo').value = '';
+                try { $('#filterFeeStudent').val('').trigger('change'); } catch(e) {}
                 loadFeeCollTable();
             }
             async function openFeeCollModal() {
@@ -4156,8 +4306,17 @@
                     await dbPut('feecollections', { ...existing, ...data, id: parseInt(id) });
                 } else {
                     const allFees = await dbGetAll('feecollections');
-                    data.receiptNo = 'REC-' + String(allFees.length + 1).padStart(4, '0');
+                    if (type === 'ماہانہ' && month) {
+                        const dup = allFees.find(f => f.studentId === studentId && f.type === 'ماہانہ' && f.month === month);
+                        if (dup) {
+                            const conf = await Swal.fire({ title: 'اس مہینے کی فیس پہلے سے جمع ہے', text: `رسید: ${dup.receiptNo}, رقم: Rs ${dup.paid}`, icon: 'warning', showCancelButton: true, confirmButtonText: 'پھر بھی جمع کریں', cancelButtonText: 'منسوخ' });
+                            if (!conf.isConfirmed) return;
+                        }
+                    }
+                    const recNum = await getNextCounter('feeReceipt');
+                    data.receiptNo = 'REC-' + String(recNum).padStart(4, '0');
                     savedId = await dbAdd('feecollections', data);
+                    await addAuditLog('فیس وصولی', 'فیس', `Rs ${paid} - ${data.receiptNo}`);
                 }
                 bootstrap.Modal.getInstance(document.getElementById('feeCollModal')).hide();
                 showToast('success', 'فیس محفوظ ہو گئی');
@@ -4260,8 +4419,8 @@
                     const existing = await dbGet('salaries', parseInt(id));
                     await dbPut('salaries', { ...existing, ...data, id: parseInt(id) });
                 } else {
-                    const all = await dbGetAll('salaries');
-                    data.slipId = 'SAL-' + String(all.length + 1).padStart(4, '0');
+                    const salNum = await getNextCounter('salarySlip');
+                    data.slipId = 'SAL-' + String(salNum).padStart(4, '0');
                     await dbAdd('salaries', data);
                 }
                 bootstrap.Modal.getInstance(document.getElementById('salaryModal')).hide();
@@ -4505,8 +4664,25 @@
                         showToast('success', 'طلباء کو کامیابی سے ترقی دے دی گئی');
                         await loadPromoStudentsPreview();
                         await loadStudentsTable();
+                        await addAuditLog('ترقی', 'طلبا', sourceStudents.length + ' طلبا کو ترقی دی گئی');
                     }
                 });
+            }
+            async function loadPromotionsPage() {
+                await populateAllSelects();
+                await loadPromoStudentsPreview();
+                const promoHistory = await dbGetAll('promotions');
+                const students = await dbGetAll('students');
+                const classes = await dbGetAll('classes');
+                const historyBody = document.getElementById('promoHistoryBody');
+                if (historyBody) {
+                    historyBody.innerHTML = promoHistory.slice(-20).reverse().map(p => {
+                        const st = students.find(s => s.id === p.studentId);
+                        const fromCls = classes.find(c => String(c.id) === String(p.fromClass));
+                        const toCls = p.toClass === 'graduated' ? { name: 'فارغ التحصیل' } : classes.find(c => String(c.id) === String(p.toClass));
+                        return `<tr><td>${st ? escapeHtml(st.name) : '—'}</td><td>${fromCls ? escapeHtml(fromCls.name) : '—'}</td><td>${toCls ? escapeHtml(toCls.name) : '—'}</td><td>${p.date || ''}</td></tr>`;
+                    }).join('');
+                }
             }
             async function loadExamsTable() {
                 const clsFilter = document.getElementById('filterExamClass').value;
@@ -4628,6 +4804,7 @@
     ${subjectsHtml}
     <hr>
     <div class="r-row"><span>فیصد</span><span>${ex.percent}</span></div>
+    <div class="r-row"><span>درجہ</span><span>${(() => { const sameExam = allExams.filter(e => e.examName === ex.examName && e.classId === ex.classId); const studentTotals = {}; sameExam.forEach(e => { if (!studentTotals[e.studentId]) studentTotals[e.studentId] = { obt: 0, tot: 0 }; studentTotals[e.studentId].obt += e.obtained || 0; studentTotals[e.studentId].tot += e.total || 0; }); const sorted = Object.entries(studentTotals).sort((a, b) => (b[1].obt / b[1].tot) - (a[1].obt / a[1].tot)); const rank = sorted.findIndex(([sid]) => parseInt(sid) === ex.studentId) + 1; return rank > 0 ? rank + ' / ' + sorted.length : '—'; })()}</span></div>
     <div class="r-row r-total"><span>گریڈ</span><span>${ex.grade}</span></div>
     <div class="r-row"><span>نتیجہ</span><span style="color:${ex.result === 'پاس' ? 'green' : 'red'}">${ex.result}</span></div>
     <div class="print-footer" style="margin-top:1rem;text-align:center;font-size:.7rem;color:#666;border-top:1px dashed #ccc;padding-top:.5rem">
@@ -4871,7 +5048,20 @@
                     const total = data.reduce((a, b) => a + (b.amount || 0), 0);
                     html = `${printHead}<h6>Ø¹Ø·ÛŒØ§Øª Ùˆ Ø²Ú©ÙˆÙ°Ûƒ Ø±Ù¾ÙˆØ±Ù¹</h6><div class="table-responsive"><table class="table table-sm table-striped"><thead><tr><th>Ø±Ø³ÛŒØ¯#</th><th>Ø¹Ø·ÛŒÛ Ø¯ÛÙ†Ø¯Û</th><th>Ù‚Ø³Ù…</th><th>Ø±Ù‚Ù…</th><th>Ø±Ø§Ø¨Ø·Û</th><th>ØªØ§Ø±ÛŒØ®</th></tr></thead><tbody>${data.map(d => `<tr><td>${d.receiptNo || d.id}</td><td>${d.donor || ''}</td><td>${d.category || ''}</td><td>Rs ${(d.amount || 0).toLocaleString()}</td><td>${d.mobile || ''}</td><td>${d.date || ''}</td></tr>`).join('')}</tbody><tfoot><tr><td colspan="3"><strong>Ú©Ù„</strong></td><td><strong>Rs ${total.toLocaleString()}</strong></td><td colspan="2"></td></tr></tfoot></table></div>`;
                 } else if (type === 'attendanceSummary') {
-                    html = `${printHead}<h6>حاضری خلاصہ</h6><div class="table-responsive"><table class="table table-sm table-striped"><thead><tr><th>طالب علم</th><th>جماعت</th><th>حاضر</th><th>غائب</th><th>رخصت</th><th>کل</th></tr></thead><tbody>${students.map(s => { const cls = classes.find(c => c.id === s.classId); const sAtt = attendance.filter(a => a.studentId === s.id); const p = sAtt.filter(a => a.status === 'ح').length; const ab = sAtt.filter(a => a.status === 'غ').length; const l = sAtt.filter(a => a.status === 'ر').length; return `<tr><td>${s.name}</td><td>${cls ? cls.name : '—'}</td><td><span class="badge-green">${p}</span></td><td><span class="badge-red">${ab}</span></td><td><span class="badge-gold">${l}</span></td><td>${sAtt.length}</td></tr>`; }).join('')}</tbody></table></div>`;
+                    html = `${printHead}<h6>حاضری خلاصہ</h6><div class="table-responsive"><table class="table table-sm table-striped"><thead><tr><th>طالب علم</th><th>جماعت</th><th>حاضر</th><th>غائب</th><th>رخصت</th><th>کل</th><th>فیصد</th></tr></thead><tbody>${students.map(s => { const cls = classes.find(c => c.id === s.classId); const sAtt = attendance.filter(a => a.studentId === s.id); const p = sAtt.filter(a => a.status === 'ح').length; const ab = sAtt.filter(a => a.status === 'غ').length; const l = sAtt.filter(a => a.status === 'ر').length; const total = sAtt.length; const pct = total > 0 ? ((p / total) * 100).toFixed(1) : '0.0'; const pctClass = pct >= 75 ? 'green' : pct >= 50 ? 'gold' : 'red'; return `<tr><td>${escapeHtml(s.name)}</td><td>${cls ? escapeHtml(cls.name) : '—'}</td><td><span class="badge-green">${p}</span></td><td><span class="badge-red">${ab}</span></td><td><span class="badge-gold">${l}</span></td><td>${total}</td><td><span class="badge-${pctClass}">${pct}%</span></td></tr>`; }).join('')}</tbody></table></div>`;
+                } else if (type === 'inventory') {
+                    const invItems = await dbGetAll('inventory');
+                    const totalVal = invItems.reduce((a, b) => a + ((b.qty || 0) * (b.unitPrice || 0)), 0);
+                    html = `${printHead}<h6>انوینٹری رپورٹ</h6><div class="table-responsive"><table class="table table-sm table-striped"><thead><tr><th>آئٹم</th><th>قسم</th><th>مقدار</th><th>فی اکائی قیمت</th><th>کل قیمت</th><th>تاریخ</th></tr></thead><tbody>${invItems.map(i => `<tr><td>${escapeHtml(i.name)}</td><td>${escapeHtml(i.category || '')}</td><td>${i.qty || 0}</td><td>Rs ${(i.unitPrice || 0).toLocaleString()}</td><td>Rs ${((i.qty || 0) * (i.unitPrice || 0)).toLocaleString()}</td><td>${i.date || ''}</td></tr>`).join('')}</tbody><tfoot><tr><td colspan="4"><strong>کل قیمت</strong></td><td><strong>Rs ${totalVal.toLocaleString()}</strong></td><td></td></tr></tfoot></table></div>`;
+                } else if (type === 'libraryOverdue') {
+                    const libItems = await dbGetAll('library');
+                    const todayStr = today();
+                    const overdue = libItems.filter(l => l.status !== 'returned' && l.dueDate && l.dueDate < todayStr);
+                    html = `${printHead}<h6>زیر التواء کتابیں (${overdue.length})</h6><div class="table-responsive"><table class="table table-sm table-striped"><thead><tr><th>کتاب</th><th>طالب علم</th><th>جاری تاریخ</th><th>واپسی تاریخ</th><th>بقایا دن</th></tr></thead><tbody>${overdue.map(l => { const st = students.find(s => s.id === l.studentId); const daysLate = Math.ceil((new Date(todayStr) - new Date(l.dueDate)) / 86400000); return `<tr><td>${escapeHtml(l.bookName)}</td><td>${st ? escapeHtml(st.name) : '—'}</td><td>${l.issueDate || ''}</td><td>${l.dueDate || ''}</td><td><span class="badge-red">${daysLate} دن</span></td></tr>`; }).join('')}</tbody></table></div>`;
+                } else if (type === 'hostelReport') {
+                    const hostelAll = await dbGetAll('hostel');
+                    const totalMess = hostelAll.filter(h => h.feeStatus !== 'paid').reduce((a, b) => a + (b.messFee || 0), 0);
+                    html = `${printHead}<h6>ہاسٹل رپورٹ</h6><div class="table-responsive"><table class="table table-sm table-striped"><thead><tr><th>طالب علم</th><th>کمرہ</th><th>حالت</th><th>کھانا فیس</th><th>فیس حالت</th><th>داخلہ</th><th>اخراج</th></tr></thead><tbody>${hostelAll.map(h => { const st = students.find(s => s.id === h.studentId); return `<tr><td>${st ? escapeHtml(st.name) : '—'}</td><td>${escapeHtml(h.room || '')}</td><td><span class="badge-${h.residentStatus === 'active' ? 'green' : 'red'}">${h.residentStatus === 'active' ? 'مقیم' : 'چھوڑ چکا'}</span></td><td>Rs ${(h.messFee || 0).toLocaleString()}</td><td><span class="badge-${h.feeStatus === 'paid' ? 'green' : 'red'}">${h.feeStatus === 'paid' ? 'ادا شدہ' : 'باقی'}</span></td><td>${h.checkInDate || '—'}</td><td>${h.checkOutDate || '—'}</td></tr>`; }).join('')}</tbody><tfoot><tr><td colspan="3"><strong>کل باقی کھانا فیس</strong></td><td><strong>Rs ${totalMess.toLocaleString()}</strong></td><td colspan="3"></td></tr></tfoot></table></div>`;
                 }
                 html += `<div style="margin-top:1.5rem;border-top:1px solid #ddd;padding-top:.75rem;text-align:center;font-size:.72rem;color:#6b8c72">Created by: Yasin Ullah – Bannu Software Solutions | <a href="https://www.yasinbss.com" target="_blank">www.yasinbss.com</a> | WhatsApp: 03361593533</div>`;
                 out.innerHTML = html;
@@ -4885,6 +5075,24 @@
                 if (!element) { showToast('error', 'پہلے رپورٹ جنریٹ کریں'); return; }
                 const opt = { margin: 10, filename: 'Report_' + today() + '.pdf', image: { type: 'jpeg', quality: 0.98 }, html2canvas: { scale: 2 }, jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' } };
                 html2pdf().set(opt).from(element).save();
+            }
+            async function loadAuditLog() {
+                const logs = await dbGetAll('auditlog');
+                const body = document.getElementById('auditLogBody');
+                if (!body) return;
+                if (logs.length === 0) { body.innerHTML = '<tr><td colspan="6" class="text-center text-muted">کوئی لاگ نہیں</td></tr>'; return; }
+                body.innerHTML = logs.slice(-50).reverse().map(l => `<tr><td>${escapeHtml(l.user)}</td><td><span class="badge-${l.role === 'admin' ? 'green' : 'gold'}">${l.role === 'admin' ? 'ایڈمن' : 'استاد'}</span></td><td>${escapeHtml(l.action)}</td><td>${escapeHtml(l.module)}</td><td>${escapeHtml(l.detail)}</td><td style="font-size:.72rem;white-space:nowrap">${l.timestamp ? new Date(l.timestamp).toLocaleString('ur-PK') : ''}</td></tr>`).join('');
+            }
+            async function clearAuditLog() {
+                if (!ensureAdminAccess('لاگ صاف')) return;
+                Swal.fire({ title: 'آڈٹ لاگ صاف کریں؟', icon: 'warning', showCancelButton: true, confirmButtonText: 'ہاں', cancelButtonText: 'نہیں', confirmButtonColor: '#c0392b' }).then(async r => {
+                    if (r.isConfirmed) {
+                        const logs = await dbGetAll('auditlog');
+                        for (const log of logs) { await dbDelete('auditlog', log.id); }
+                        showToast('success', 'لاگ صاف ہو گیا');
+                        await loadAuditLog();
+                    }
+                });
             }
             async function loadUsersTable() {
                 const users = await dbGetAll('users');
@@ -5181,9 +5389,10 @@
                     const existing = await dbGet('donations', parseInt(id));
                     await dbPut('donations', { ...existing, ...data, id: parseInt(id) });
                 } else {
-                    const all = await dbGetAll('donations');
-                    data.receiptNo = 'DON-' + String(all.length + 1).padStart(4, '0');
+                    const donNum = await getNextCounter('donationReceipt');
+                    data.receiptNo = 'DON-' + String(donNum).padStart(4, '0');
                     await dbAdd('donations', data);
+                    await addAuditLog('عطیہ', 'عطیات', `Rs ${data.amount} - ${data.receiptNo}`);
                 }
                 bootstrap.Modal.getInstance(document.getElementById('donationModal')).hide();
                 showToast('success', 'عطیہ محفوظ ہو گیا');
@@ -5200,7 +5409,10 @@
                 const tbody = document.getElementById('libraryBody');
                 tbody.innerHTML = library.map(l => {
                     const st = students.find(s => s.id === l.studentId);
-                    return `<tr class="animate__animated animate__fadeIn"><td>${l.bookName || ''}</td><td>${st ? st.name : '—'}</td><td>${l.issueDate || ''}</td><td>${l.dueDate || ''}</td><td><span class="badge-${l.status === 'returned' ? 'green' : 'gold'}">${l.status === 'returned' ? 'واپس شدہ' : 'جاری کردہ'}</span></td><td><button class="btn-edit-soft me-1" onclick="openLibraryModal(${l.id})"><i class="fa fa-edit"></i></button><button class="btn-danger-soft" onclick="deleteLibrary(${l.id})"><i class="fa fa-trash"></i></button></td></tr>`;
+                    const isOverdue = l.status !== 'returned' && l.dueDate && l.dueDate < today();
+                    const daysLate = isOverdue ? Math.ceil((new Date(today()) - new Date(l.dueDate)) / 86400000) : 0;
+                    const statusLabel = l.status === 'returned' ? '<span class="badge-green">واپس شدہ</span>' : isOverdue ? `<span class="badge-red">میعاد گزری (${daysLate} دن)</span>` : '<span class="badge-gold">جاری کردہ</span>';
+                    return `<tr class="animate__animated animate__fadeIn"><td>${escapeHtml(l.bookName)}</td><td>${st ? escapeHtml(st.name) : '—'}</td><td>${l.issueDate || ''}</td><td>${l.dueDate || ''}</td><td>${statusLabel}</td><td><button class="btn-edit-soft me-1" onclick="openLibraryModal(${l.id})"><i class="fa fa-edit"></i></button><button class="btn-danger-soft" onclick="deleteLibrary(${l.id})"><i class="fa fa-trash"></i></button></td></tr>`;
                 }).join('');
                 initDT('libraryTable');
             }
@@ -5248,7 +5460,7 @@
                 const tbody = document.getElementById('hostelBody');
                 tbody.innerHTML = hostel.map(h => {
                     const st = students.find(s => s.id === h.studentId);
-                    return `<tr class="animate__animated animate__fadeIn"><td>${st ? st.name : '—'}</td><td>${h.room || ''}</td><td><span class="badge-${h.residentStatus === 'active' ? 'green' : 'red'}">${h.residentStatus === 'active' ? 'مقیم' : 'چھوڑ چکا'}</span></td><td>Rs ${(h.messFee || 0).toLocaleString()}</td><td><span class="badge-${h.feeStatus === 'paid' ? 'green' : 'red'}">${h.feeStatus === 'paid' ? 'ادا شدہ' : 'باقی'}</span></td><td><button class="btn-edit-soft me-1" onclick="openHostelModal(${h.id})"><i class="fa fa-edit"></i></button><button class="btn-danger-soft" onclick="deleteHostel(${h.id})"><i class="fa fa-trash"></i></button></td></tr>`;
+                    return `<tr class="animate__animated animate__fadeIn"><td>${st ? escapeHtml(st.name) : '—'}</td><td>${escapeHtml(h.room || '')}</td><td><span class="badge-${h.residentStatus === 'active' ? 'green' : 'red'}">${h.residentStatus === 'active' ? 'مقیم' : 'چھوڑ چکا'}</span></td><td>Rs ${(h.messFee || 0).toLocaleString()}</td><td><span class="badge-${h.feeStatus === 'paid' ? 'green' : 'red'}">${h.feeStatus === 'paid' ? 'ادا شدہ' : 'باقی'}</span></td><td>${h.checkInDate || '—'}</td><td>${h.checkOutDate || '—'}</td><td><button class="btn-edit-soft me-1" onclick="openHostelModal(${h.id})"><i class="fa fa-edit"></i></button><button class="btn-danger-soft" onclick="deleteHostel(${h.id})"><i class="fa fa-trash"></i></button></td></tr>`;
                 }).join('');
                 initDT('hostelTable');
             }
@@ -5264,6 +5476,8 @@
                         document.getElementById('hsResidentStatus').value = h.residentStatus || 'active';
                         document.getElementById('hsMessFee').value = h.messFee || '';
                         document.getElementById('hsFeeStatus').value = h.feeStatus || 'unpaid';
+                        document.getElementById('hsCheckInDate').value = h.checkInDate || '';
+                        document.getElementById('hsCheckOutDate').value = h.checkOutDate || '';
                     }
                 }
                 try { $('#hsStudent').trigger('change'); } catch (e) { }
@@ -5276,8 +5490,10 @@
                 const residentStatus = document.getElementById('hsResidentStatus').value;
                 const messFee = parseFloat(document.getElementById('hsMessFee').value) || 0;
                 const feeStatus = document.getElementById('hsFeeStatus').value;
+                const checkInDate = document.getElementById('hsCheckInDate').value;
+                const checkOutDate = document.getElementById('hsCheckOutDate').value;
                 if (!studentId || !room) { showToast('error', 'طالب علم اور کمرہ نمبر ضروری ہے'); return; }
-                const data = { studentId, room, residentStatus, messFee, feeStatus };
+                const data = { studentId, room, residentStatus, messFee, feeStatus, checkInDate, checkOutDate };
                 if (id) { await dbPut('hostel', { ...data, id: parseInt(id) }); }
                 else { await dbAdd('hostel', data); }
                 bootstrap.Modal.getInstance(document.getElementById('hostelModal')).hide();
