@@ -926,15 +926,16 @@
                 left: 0;
                 right: 0;
                 width: 100%;
-                height: auto;
-                max-height: 72px;
+                height: 60px;
+                max-height: 60px;
                 flex-direction: row;
                 padding-bottom: env(safe-area-inset-bottom);
                 z-index: 1000;
                 transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-                box-shadow: 0 -2px 15px rgba(0, 0, 0, 0.25);
+                box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.3);
                 overflow: hidden;
-                background: linear-gradient(180deg, var(--green-dark) 0%, #0f4425 100%);
+                background: linear-gradient(180deg, #1a5c35 0%, var(--green-dark) 100%);
+                border-top: 1px solid rgba(255,255,255,0.08);
             }
 
             #sidebar.hidden-scroll {
@@ -943,7 +944,7 @@
 
             #main-content {
                 margin-right: 0 !important;
-                margin-bottom: 72px;
+                margin-bottom: 60px;
             }
 
             .menu-toggle {
@@ -960,55 +961,145 @@
                 display: flex;
                 flex-direction: row;
                 width: 100%;
+                height: 60px;
                 padding: 0;
                 overflow-x: auto;
+                overflow-y: hidden;
                 scroll-snap-type: x mandatory;
                 -webkit-overflow-scrolling: touch;
                 align-items: stretch;
+                scrollbar-width: none;
+                -ms-overflow-style: none;
             }
 
             #sideNav::-webkit-scrollbar {
                 display: none;
             }
 
+            /* === ICON-ONLY NAV ITEMS === */
             #sideNav a {
+                flex: 0 0 auto;
+                display: flex;
                 flex-direction: column;
                 justify-content: center;
                 align-items: center;
-                min-width: 68px;
-                min-height: 44px;
-                height: 100%;
-                padding: .35rem .25rem;
+                width: 52px;
+                min-width: 52px;
+                max-width: 52px;
+                height: 60px;
+                padding: 0;
                 border-right: none;
-                border-bottom: 3px solid transparent;
-                font-size: .65rem;
-                gap: .2rem;
+                border-bottom: none;
+                font-size: 0 !important;
+                line-height: 0;
+                gap: 0;
                 scroll-snap-align: start;
-                color: rgba(255, 255, 255, .7);
-                letter-spacing: 0;
+                color: rgba(255, 255, 255, .55);
                 -webkit-tap-highlight-color: transparent;
+                position: relative;
+                transition: all 0.2s ease;
+                text-indent: -9999px;
+                overflow: hidden;
             }
 
             #sideNav a i {
-                width: auto;
-                font-size: 1.2rem;
+                width: 36px;
+                height: 36px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                font-size: 1.15rem;
                 margin: 0;
-                color: rgba(255, 255, 255, .75);
+                color: rgba(255, 255, 255, .6);
+                border-radius: 10px;
+                transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+                text-indent: 0;
             }
 
+            /* Active state with pill highlight + dot indicator */
             #sideNav a.active {
-                border-bottom-color: var(--gold);
-                background: rgba(255, 255, 255, 0.15);
                 color: #fff;
+                background: transparent;
             }
 
             #sideNav a.active i {
                 color: var(--gold);
+                background: rgba(201, 162, 39, 0.15);
+                transform: scale(1.1);
             }
 
-            #sideNav a:hover {
-                background: rgba(255, 255, 255, 0.08);
+            /* Active dot indicator below icon */
+            #sideNav a.active::after {
+                content: '';
+                position: absolute;
+                bottom: 5px;
+                left: 50%;
+                transform: translateX(-50%);
+                width: 5px;
+                height: 5px;
+                border-radius: 50%;
+                background: var(--gold);
+                box-shadow: 0 0 6px rgba(201, 162, 39, 0.6);
+            }
+
+            /* Pressed / hover feedback */
+            #sideNav a:active i {
+                transform: scale(0.9);
+                background: rgba(255, 255, 255, 0.12);
+            }
+
+            /* Tooltip on long-press / hover — appears above nav */
+            #sideNav a[data-tooltip]:active::before,
+            #sideNav a[data-tooltip]:hover::before {
+                content: attr(data-tooltip);
+                position: absolute;
+                bottom: calc(100% + 8px);
+                left: 50%;
+                transform: translateX(-50%);
+                background: rgba(15, 40, 25, 0.95);
                 color: #fff;
+                padding: 4px 10px;
+                border-radius: 6px;
+                font-size: 0.72rem;
+                white-space: nowrap;
+                z-index: 9999;
+                pointer-events: none;
+                box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+                text-indent: 0;
+                line-height: 1.4;
+                letter-spacing: 0;
+                font-family: var(--font-urdu);
+            }
+
+            /* Tooltip arrow */
+            #sideNav a[data-tooltip]:active::after,
+            #sideNav a[data-tooltip]:hover::after {
+                content: '';
+                position: absolute;
+                bottom: calc(100% + 3px);
+                left: 50%;
+                transform: translateX(-50%);
+                border: 5px solid transparent;
+                border-top-color: rgba(15, 40, 25, 0.95);
+                z-index: 9999;
+                pointer-events: none;
+            }
+
+            /* Override the active dot when showing tooltip */
+            #sideNav a.active[data-tooltip]:hover::after,
+            #sideNav a.active[data-tooltip]:active::after {
+                content: '';
+                position: absolute;
+                bottom: calc(100% + 3px);
+                left: 50%;
+                transform: translateX(-50%);
+                border: 5px solid transparent;
+                border-top-color: rgba(15, 40, 25, 0.95);
+                width: auto;
+                height: auto;
+                border-radius: 0;
+                background: transparent;
+                box-shadow: none;
             }
 
             .page-content {
@@ -1027,16 +1118,20 @@
 
             .page-content {
                 padding: .75rem;
-                padding-bottom: 85px
+                padding-bottom: 75px
             }
 
             #sideNav a {
-                min-width: 58px;
-                font-size: .6rem;
+                width: 46px;
+                min-width: 46px;
+                max-width: 46px;
             }
 
             #sideNav a i {
-                font-size: 1.1rem;
+                font-size: 1.05rem;
+                width: 32px;
+                height: 32px;
+                border-radius: 8px;
             }
         }
 
