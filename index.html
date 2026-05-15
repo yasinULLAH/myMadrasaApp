@@ -1576,8 +1576,14 @@
                                         <tbody id="attBody"></tbody>
                                     </table>
                                 </div>
-                                <button class="btn-primary-green mt-2" id="btnSaveAtt" onclick="saveAttendance()"><i
-                                        class="fa fa-save"></i> حاضری محفوظ کریں</button>
+                                <div style="display:flex;gap:.5rem;flex-wrap:wrap;margin-top:.5rem">
+                                    <button class="btn-primary-green" id="btnSaveAtt" onclick="saveAttendance()"><i
+                                            class="fa fa-save"></i> حاضری محفوظ کریں</button>
+                                    <button class="btn btn-sm btn-success" onclick="markAllAttendance('ح')"
+                                        title="سب حاضر"><i class="fa fa-check-double"></i> سب حاضر</button>
+                                    <button class="btn btn-sm btn-danger" onclick="markAllAttendance('غ')"
+                                        title="سب غائب"><i class="fa fa-times"></i> سب غائب</button>
+                                </div>
                             </div>
                             <div id="attMonthlyView" style="display:none">
                                 <div class="timetable-grid">
@@ -1650,6 +1656,11 @@
                                             onclick="generateAndPrintResultCard()"><i class="fa fa-eye"></i> رزلٹ کارڈ
                                             دیکھیں / پرنٹ</button>
                                     </div>
+                                    <div class="col-auto">
+                                        <button class="btn btn-sm btn-outline-success"
+                                            onclick="generateAnnualResultCard()"><i class="fa fa-calendar-check"></i>
+                                            سالانہ مجموعی رزلٹ</button>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -1716,8 +1727,12 @@
                     <div class="section-card animate__animated animate__fadeInUp">
                         <div class="sc-head">
                             <h4><i class="fa fa-user-clock text-success me-1"></i> عملہ حاضری</h4>
-                            <button class="btn-primary-green" onclick="saveStaffAtt()"><i class="fa fa-save"></i> محفوظ
-                                کریں</button>
+                            <div style="display:flex;gap:.5rem;flex-wrap:wrap">
+                                <button class="btn-primary-green" onclick="saveStaffAtt()"><i class="fa fa-save"></i>
+                                    محفوظ کریں</button>
+                                <button class="btn btn-sm btn-success" onclick="markAllStaffAtt('ح')" title="سب حاضر"><i
+                                        class="fa fa-check-double"></i> سب حاضر</button>
+                            </div>
                         </div>
                         <div class="sc-body">
                             <div class="row g-2 mb-3">
@@ -1795,6 +1810,7 @@
                                         <option value="inventory">انوینٹری رپورٹ</option>
                                         <option value="libraryOverdue">زیر التواء کتابیں (Overdue Books)</option>
                                         <option value="hostelReport">ہاسٹل رپورٹ</option>
+                                        <option value="defaulters">ڈیفالٹرز رپورٹ (Defaulters List)</option>
                                     </select>
                                 </div>
                                 <div class="col-6 col-md-3">
@@ -2080,11 +2096,14 @@
                                         <option value="graduated">فارغ التحصیل (Graduated / Archived)</option>
                                     </select>
                                 </div>
-                                <div class="col-12 col-md-2 d-flex align-items-end">
+                                <div class="col-12 col-md-2 d-flex align-items-end gap-1">
                                     <button class="btn-primary-green btn-sm w-100 mt-4"
                                         onclick="executeMassPromotion()"><i class="fa fa-check-double"></i> ترقی لاگو
                                         کریں</button>
                                 </div>
+                                <div class="col-12"><button class="btn btn-sm btn-outline-danger"
+                                        onclick="undoLastPromotion()"><i class="fa fa-undo"></i> آخری ترقی واپس لیں
+                                        (Undo)</button></div>
                             </div>
                             <div class="table-responsive">
                                 <label class="fw-bold mb-2" style="font-size:.8rem">متاثرہ طلباء کی فہرست:</label>
@@ -2431,6 +2450,18 @@
                             <h4><i class="fa fa-history text-success me-1"></i> آڈٹ لاگ (Audit Log)</h4>
                         </div>
                         <div class="sc-body">
+                            <div class="row g-2 mb-2 align-items-center">
+                                <div class="col-auto"><input class="form-control form-control-sm" id="auditFilterFrom"
+                                        onchange="loadAuditLog()" placeholder="از" type="date" /></div>
+                                <div class="col-auto"><input class="form-control form-control-sm" id="auditFilterTo"
+                                        onchange="loadAuditLog()" placeholder="تا" type="date" /></div>
+                                <div class="col-auto"><select class="form-select form-select-sm" id="auditFilterModule"
+                                        onchange="loadAuditLog()">
+                                        <option value="">تمام ماڈیول</option>
+                                    </select></div>
+                                <div class="col-auto"><button class="btn-outline-green btn-sm"
+                                        onclick="exportAuditCSV()"><i class="fa fa-file-csv"></i> CSV</button></div>
+                            </div>
                             <div class="table-responsive" style="max-height:350px;overflow-y:auto">
                                 <table class="table table-sm table-bordered">
                                     <thead>
@@ -2848,6 +2879,18 @@
                                 <label>مقررہ تنخواہ</label>
                                 <input class="form-control" id="salFixed" readonly="" type="number" />
                             </div>
+                            <div class="row g-2 mb-3">
+                                <div class="col-6">
+                                    <label>غیر حاضری (دن)</label>
+                                    <input class="form-control" id="salAbsentDays" readonly=""
+                                        style="background:#fff3f3" type="number" value="0" />
+                                </div>
+                                <div class="col-6">
+                                    <label>کٹوتی (غیر حاضری)</label>
+                                    <input class="form-control" id="salDeduction" readonly="" style="background:#fff3f3"
+                                        type="number" value="0" />
+                                </div>
+                            </div>
                             <div class="mb-3">
                                 <label>ادا کی جانے والی رقم *</label>
                                 <input class="form-control" id="salPaid" oninput="calcSalBalance()" placeholder="روپے"
@@ -3086,9 +3129,11 @@
                             <div class="mb-3">
                                 <label>کردار *</label>
                                 <select class="form-select" id="uRole"
-                                    onchange="document.getElementById('uTeacherSelectWrap').style.display = this.value === 'teacher' ? 'block' : 'none'">
-                                    <option value="admin">ایڈمن</option>
-                                    <option value="teacher">استاد</option>
+                                    onchange="document.getElementById('uTeacherSelectWrap').style.display = (this.value === 'teacher') ? 'block' : 'none'">
+                                    <option value="admin">ایڈمن (Admin)</option>
+                                    <option value="teacher">استاد (Teacher)</option>
+                                    <option value="accountant">اکاؤنٹنٹ (Accountant)</option>
+                                    <option value="librarian">لائبریرین (Librarian)</option>
                                 </select>
                             </div>
                             <div class="mb-3" id="uTeacherSelectWrap" style="display:none">
@@ -3416,8 +3461,8 @@
         <script src="https://cdn.jsdelivr.net/npm/just-validate@4.3.0/dist/just-validate.production.min.js"></script>
         <script>
             const DB_NAME = 'MadrasaMgmt';
-            const DB_VER = 3;
-            const STORES = ['users', 'students', 'teachers', 'classes', 'feestructures', 'feecollections', 'salaries', 'expenses', 'attendance', 'staffattendance', 'exams', 'timetable', 'inventory', 'settings', 'library', 'libraryIssues', 'hostel', 'hostelAllocations', 'fines', 'certificates', 'donations', 'promotions', 'academicYears', 'auditlog', 'bookcatalog', 'counters'];
+            const DB_VER = 4;
+            const STORES = ['users', 'students', 'teachers', 'classes', 'feestructures', 'feecollections', 'salaries', 'expenses', 'attendance', 'staffattendance', 'exams', 'timetable', 'inventory', 'settings', 'library', 'libraryIssues', 'hostel', 'hostelAllocations', 'fines', 'certificates', 'donations', 'promotions', 'academicYears', 'auditlog', 'bookcatalog', 'counters', 'gradingSchemes', 'leaveQuotas'];
             let db;
             let currentUser = null;
             let idleTimer = null;
@@ -3705,15 +3750,25 @@
                 btn.innerHTML = '<i class="fa fa-sign-in-alt"></i> داخل ہوں'; btn.disabled = false;
             }
             function applyRoleUI() {
-                if (currentUser && currentUser.role !== 'admin') {
-                    document.querySelectorAll('[data-admin-only]').forEach(el => el.style.display = 'none');
-                    const restricted = ['feestructure', 'salary', 'expenses', 'inventory', 'settings'];
-                    restricted.forEach(p => {
+                if (!currentUser) return;
+                const role = currentUser.role;
+                if (role === 'admin') return;
+                document.querySelectorAll('[data-admin-only]').forEach(el => el.style.display = 'none');
+                // Feature 18: Enhanced RBAC
+                const rolePermissions = {
+                    teacher: ['dashboard', 'students', 'attendance', 'exams', 'timetable', 'certificates'],
+                    accountant: ['dashboard', 'students', 'feecollection', 'feestructure', 'salary', 'expenses', 'fines', 'donations', 'reports'],
+                    librarian: ['dashboard', 'library', 'inventory', 'reports']
+                };
+                const allowed = rolePermissions[role] || [];
+                const allPages = ['dashboard', 'students', 'teachers', 'classes', 'feestructure', 'feecollection', 'salary', 'expenses', 'attendance', 'exams', 'timetable', 'staffattendance', 'inventory', 'reports', 'idcards', 'fines', 'donations', 'library', 'hostel', 'certificates', 'promotions', 'settings'];
+                allPages.forEach(p => {
+                    if (!allowed.includes(p)) {
                         const link = document.querySelector(`[data-page="${p}"]`);
                         if (link) link.style.display = 'none';
-                    });
-                    applyTeacherReadOnlyUI();
-                }
+                    }
+                });
+                if (role === 'teacher') applyTeacherReadOnlyUI();
             }
             function getLastPageStorageKey() {
                 const uname = currentUser && currentUser.username ? currentUser.username : 'guest';
@@ -3721,11 +3776,15 @@
             }
             function canOpenPage(page) {
                 if (!page || !document.getElementById('page-' + page)) return false;
-                if (currentUser && currentUser.role !== 'admin') {
-                    const restricted = ['feestructure', 'salary', 'expenses', 'inventory', 'settings'];
-                    if (restricted.includes(page)) return false;
-                }
-                return true;
+                if (!currentUser) return false;
+                if (currentUser.role === 'admin') return true;
+                const rolePermissions = {
+                    teacher: ['dashboard', 'students', 'attendance', 'exams', 'timetable', 'certificates'],
+                    accountant: ['dashboard', 'students', 'feecollection', 'feestructure', 'salary', 'expenses', 'fines', 'donations', 'reports'],
+                    librarian: ['dashboard', 'library', 'inventory', 'reports']
+                };
+                const allowed = rolePermissions[currentUser.role] || [];
+                return allowed.includes(page);
             }
             function getInitialPage() {
                 const savedPage = localStorage.getItem(getLastPageStorageKey()) || 'dashboard';
@@ -4226,6 +4285,12 @@
                     if (overdueBooks.length > 0) {
                         alertHtml += `<div class="alert alert-danger" style="font-size:.82rem;margin-bottom:.5rem"><i class="fa fa-book me-1"></i> <strong>${overdueBooks.length}</strong> کتابیں واپسی کی تاریخ سے تجاوز کر چکی ہیں</div>`;
                     }
+                    // Feature 15: Low-stock alerts
+                    const invItems = await dbGetAll('inventory');
+                    const lowStock = invItems.filter(i => (i.qty || 0) < 5);
+                    if (lowStock.length > 0) {
+                        alertHtml += `<div class="alert alert-info" style="font-size:.82rem;margin-bottom:.5rem"><i class="fa fa-boxes me-1"></i> ⚠️ <strong>${lowStock.length}</strong> اشیاء کا اسٹاک کم ہے: ${lowStock.slice(0, 5).map(i => escapeHtml(i.name) + ' (' + i.qty + ')').join('، ')}${lowStock.length > 5 ? ' ...' : ''}</div>`;
+                    }
                     alertBox.innerHTML = alertHtml;
                 }
                 updateCalcSummary();
@@ -4357,6 +4422,14 @@
                 const status = document.getElementById('sStatus').value;
                 const prevEducation = document.getElementById('sPrevEducation').value.trim();
                 if (!enrollNo || !name || !fatherName || !classId) { showToast('error', 'نشاندہی شدہ فیلڈز ضروری ہیں'); return; }
+                // Feature 3: Duplicate enrollment prevention
+                if (!id) {
+                    const allStudents = await dbGetAll('students');
+                    const dupEnroll = allStudents.find(s => s.enrollNo === enrollNo);
+                    if (dupEnroll) { showToast('error', 'یہ داخلہ نمبر (' + enrollNo + ') پہلے سے موجود ہے: ' + dupEnroll.name); return; }
+                    const dupName = allStudents.find(s => s.name === name && s.fatherName === fatherName && s.classId === classId);
+                    if (dupName) { showToast('warning', 'اسی نام/والد/جماعت کا طالب علم پہلے سے موجود ہے (' + dupName.enrollNo + ')'); return; }
+                }
                 const data = { enrollNo, name, fatherName, classId, enrollDate, contact, address, photo, gender, dob, bloodGroup, guardianName, emergencyContact, status, prevEducation };
                 if (id) { await dbPut('students', { ...data, id: parseInt(id) }); await addAuditLog('ترمیم', 'طلبا', name); }
                 else { await dbAdd('students', data); await addAuditLog('اضافہ', 'طلبا', name); }
@@ -4623,11 +4696,28 @@
                 const feeStructs = await dbGetAll('feestructures');
                 const type = document.getElementById('fcType').value;
                 const fs = feeStructs.find(f => f.classId === st.classId && f.type === type);
-                if (fs) { document.getElementById('fcDue').value = fs.amount; calcFeeNet(); }
+                let dueAmount = 0;
+                if (fs) { dueAmount = fs.amount; }
                 else {
                     const cls = await dbGet('classes', st.classId);
-                    if (cls && cls.monthlyFee) { document.getElementById('fcDue').value = cls.monthlyFee; calcFeeNet(); }
+                    if (cls && cls.monthlyFee) { dueAmount = cls.monthlyFee; }
                 }
+                // Feature 7: Sibling discount detection
+                let siblingDiscount = 0;
+                if (st.fatherName && st.contact) {
+                    const allStudents = await dbGetAll('students');
+                    const siblings = allStudents.filter(s => s.id !== sid && s.fatherName === st.fatherName && s.contact === st.contact && s.status === 'active');
+                    if (siblings.length > 0) {
+                        const settings = await dbGetAll('settings');
+                        const cfg = settings[0] || {};
+                        const discPct = cfg.siblingDiscountPct || 10;
+                        siblingDiscount = Math.round(dueAmount * discPct / 100);
+                        document.getElementById('fcDiscount').value = siblingDiscount;
+                        showToast('info', 'بھائی/بہن کی رعایت (' + discPct + '%) لاگو - ' + siblings.length + ' ساتھی');
+                    }
+                }
+                document.getElementById('fcDue').value = dueAmount;
+                calcFeeNet();
             }
             async function loadStudentFeeHistory(sid) {
                 const tbody = document.getElementById('studentFeeHistoryBody');
@@ -4748,7 +4838,22 @@
                 const tid = parseInt(document.getElementById('salTeacher').value) || 0;
                 if (!tid) return;
                 const t = await dbGet('teachers', tid);
-                if (t) { document.getElementById('salFixed').value = t.salary || 0; calcSalBalance(); }
+                if (t) {
+                    document.getElementById('salFixed').value = t.salary || 0;
+                    // Feature 4: Payroll-Leave Integration - auto-calc deductions
+                    const month = document.getElementById('salMonth').value;
+                    if (month) {
+                        const staffAtt = await dbGetAll('staffattendance');
+                        const monthAtt = staffAtt.filter(a => a.teacherId === tid && a.date && a.date.startsWith(month));
+                        const absentDays = monthAtt.filter(a => a.status === 'غ').length;
+                        const dailyRate = Math.round((t.salary || 0) / 30);
+                        const deduction = dailyRate * absentDays;
+                        document.getElementById('salAbsentDays').value = absentDays;
+                        document.getElementById('salDeduction').value = deduction;
+                        document.getElementById('salPaid').value = Math.max(0, (t.salary || 0) - deduction);
+                    }
+                    calcSalBalance();
+                }
             }
             function calcSalBalance() {
                 const fixed = parseFloat(document.getElementById('salFixed').value) || 0;
@@ -5093,20 +5198,31 @@
                 filtered.forEach(s => { const o = document.createElement('option'); o.value = s.id; o.textContent = s.name; sel.appendChild(o); });
                 try { $('#exStudent').trigger('change'); } catch (e) { }
             }
-            function calcGrade() {
+            async function calcGrade() {
                 const total = parseFloat(document.getElementById('exTotal').value) || 0;
                 const obtained = parseFloat(document.getElementById('exObtained').value) || 0;
                 if (!total) return;
                 const pct = Math.round((obtained / total) * 100);
                 document.getElementById('exPercent').value = pct + '%';
-                let grade = 'F';
-                if (pct >= 90) grade = 'A+';
-                else if (pct >= 80) grade = 'A';
-                else if (pct >= 70) grade = 'B';
-                else if (pct >= 60) grade = 'C';
-                else if (pct >= 50) grade = 'D';
+                // Feature 8: Dynamic grading from gradingSchemes store
+                let grade = 'F', passPct = 50;
+                try {
+                    const schemes = await dbGetAll('gradingSchemes');
+                    const active = schemes.find(s => s.active) || schemes[0];
+                    if (active && active.scales) {
+                        passPct = active.passingPct || 50;
+                        grade = 'F';
+                        for (const sc of active.scales.sort((a, b) => b.minPct - a.minPct)) {
+                            if (pct >= sc.minPct) { grade = sc.grade; break; }
+                        }
+                    } else {
+                        if (pct >= 90) grade = 'A+'; else if (pct >= 80) grade = 'A'; else if (pct >= 70) grade = 'B'; else if (pct >= 60) grade = 'C'; else if (pct >= 50) grade = 'D';
+                    }
+                } catch (e) {
+                    if (pct >= 90) grade = 'A+'; else if (pct >= 80) grade = 'A'; else if (pct >= 70) grade = 'B'; else if (pct >= 60) grade = 'C'; else if (pct >= 50) grade = 'D';
+                }
                 document.getElementById('exGrade').value = grade;
-                document.getElementById('exResult').value = pct >= 50 ? 'پاس' : 'فیل';
+                document.getElementById('exResult').value = pct >= passPct ? 'پاس' : 'فیل';
             }
             async function saveExam() {
                 const id = document.getElementById('examId').value;
@@ -5224,6 +5340,24 @@
                     preConfirm: () => ({ subject: document.getElementById('sp_subject').value, teacher: document.getElementById('sp_teacher').value, from: document.getElementById('sp_from').value, to: document.getElementById('sp_to').value })
                 });
                 if (formVals) {
+                    // Feature 1: Timetable conflict detection
+                    if (formVals.teacher) {
+                        const currentClassId = document.getElementById('ttClassFilter').value;
+                        const allTT = await dbGetAll('timetable');
+                        for (const tt of allTT) {
+                            if (String(tt.classId) === String(currentClassId)) continue;
+                            if (tt.data && tt.data[day] && tt.data[day][period]) {
+                                const otherCell = tt.data[day][period];
+                                if (otherCell.teacher === formVals.teacher) {
+                                    const cls = await dbGet('classes', tt.classId);
+                                    const clsName = cls ? cls.name : tt.classId;
+                                    const res = await Swal.fire({ icon: 'warning', title: 'تعارض پایا گیا!', html: `<b>${formVals.teacher}</b> پہلے سے <b>${clsName}</b> میں اس وقت مصروف ہیں`, showCancelButton: true, confirmButtonText: 'پھر بھی لگائیں', cancelButtonText: 'منسوخ' });
+                                    if (!res.isConfirmed) return;
+                                    break;
+                                }
+                            }
+                        }
+                    }
                     if (!timetableData[day]) timetableData[day] = {};
                     timetableData[day][period] = formVals;
                     renderTimetableGrid(timetableData);
@@ -5420,6 +5554,17 @@
                     const hostelAll = await dbGetAll('hostel');
                     const totalMess = hostelAll.filter(h => h.feeStatus !== 'paid').reduce((a, b) => a + (b.messFee || 0), 0);
                     html = `${printHead}<h6>ہاسٹل رپورٹ</h6><div class="table-responsive"><table class="table table-sm table-striped"><thead><tr><th>طالب علم</th><th>کمرہ</th><th>حالت</th><th>کھانا فیس</th><th>فیس حالت</th><th>داخلہ</th><th>اخراج</th></tr></thead><tbody>${hostelAll.map(h => { const st = students.find(s => s.id === h.studentId); return `<tr><td>${st ? escapeHtml(st.name) : '—'}</td><td>${escapeHtml(h.room || '')}</td><td><span class="badge-${h.residentStatus === 'active' ? 'green' : 'red'}">${h.residentStatus === 'active' ? 'مقیم' : 'چھوڑ چکا'}</span></td><td>Rs ${(h.messFee || 0).toLocaleString()}</td><td><span class="badge-${h.feeStatus === 'paid' ? 'green' : 'red'}">${h.feeStatus === 'paid' ? 'ادا شدہ' : 'باقی'}</span></td><td>${h.checkInDate || '—'}</td><td>${h.checkOutDate || '—'}</td></tr>`; }).join('')}</tbody><tfoot><tr><td colspan="3"><strong>کل باقی کھانا فیس</strong></td><td><strong>Rs ${totalMess.toLocaleString()}</strong></td><td colspan="3"></td></tr></tfoot></table></div>`;
+                } else if (type === 'defaulters') {
+                    // Feature 14: Defaulters report with contact details
+                    const todayStr = today();
+                    const curMonth = todayStr.slice(0, 7);
+                    const defaulterList = students.filter(s => {
+                        if (s.status && s.status !== 'active') return false;
+                        const cls = classes.find(c => c.id === s.classId);
+                        if (!cls || !cls.monthlyFee) return false;
+                        return !feeCols.find(f => f.studentId === s.id && f.type === 'ماہانہ' && f.month === curMonth);
+                    });
+                    html = `${printHead}<h6>ڈیفالٹرز رپورٹ - ${curMonth} (${defaulterList.length} طلبا)</h6><div class="table-responsive"><table class="table table-sm table-striped"><thead><tr><th>داخلہ#</th><th>طالب علم</th><th>والد</th><th>جماعت</th><th>رابطہ</th><th>ایمرجنسی</th><th>واجب الادا</th></tr></thead><tbody>${defaulterList.map(s => { const cls = classes.find(c => c.id === s.classId); return `<tr><td>${escapeHtml(s.enrollNo || '')}</td><td>${escapeHtml(s.name)}</td><td>${escapeHtml(s.fatherName || '')}</td><td>${cls ? escapeHtml(cls.name) : '—'}</td><td>${escapeHtml(s.contact || '')}</td><td>${escapeHtml(s.emergencyContact || '')}</td><td>Rs ${(cls ? cls.monthlyFee : 0).toLocaleString()}</td></tr>`; }).join('')}</tbody></table></div>`;
                 }
                 html += `<div style="margin-top:1.5rem;border-top:1px solid #ddd;padding-top:.75rem;text-align:center;font-size:.72rem;color:#6b8c72">Created by: Yasin Ullah – Bannu Software Solutions | <a href="https://www.yasinbss.com" target="_blank">www.yasinbss.com</a> | WhatsApp: 03361593533</div>`;
                 out.innerHTML = html;
@@ -5435,11 +5580,25 @@
                 html2pdf().set(opt).from(element).save();
             }
             async function loadAuditLog() {
-                const logs = await dbGetAll('auditlog');
+                let logs = await dbGetAll('auditlog');
                 const body = document.getElementById('auditLogBody');
                 if (!body) return;
+                // Feature 17: Audit log filtering
+                const fromEl = document.getElementById('auditFilterFrom');
+                const toEl = document.getElementById('auditFilterTo');
+                const modEl = document.getElementById('auditFilterModule');
+                if (fromEl && fromEl.value) logs = logs.filter(l => l.timestamp && new Date(l.timestamp) >= new Date(fromEl.value));
+                if (toEl && toEl.value) logs = logs.filter(l => l.timestamp && new Date(l.timestamp) <= new Date(toEl.value + 'T23:59:59'));
+                if (modEl && modEl.value) logs = logs.filter(l => l.module === modEl.value);
+                // Populate module filter dropdown
+                if (modEl && modEl.options.length <= 1) {
+                    const allLogs = await dbGetAll('auditlog');
+                    const modules = [...new Set(allLogs.map(l => l.module).filter(Boolean))];
+                    modules.forEach(m => { const o = document.createElement('option'); o.value = m; o.textContent = m; modEl.appendChild(o); });
+                }
                 if (logs.length === 0) { body.innerHTML = '<tr><td colspan="6" class="text-center text-muted">کوئی لاگ نہیں</td></tr>'; return; }
-                body.innerHTML = logs.slice(-50).reverse().map(l => `<tr><td>${escapeHtml(l.user)}</td><td><span class="badge-${l.role === 'admin' ? 'green' : 'gold'}">${l.role === 'admin' ? 'ایڈمن' : 'استاد'}</span></td><td>${escapeHtml(l.action)}</td><td>${escapeHtml(l.module)}</td><td>${escapeHtml(l.detail)}</td><td style="font-size:.72rem;white-space:nowrap">${l.timestamp ? new Date(l.timestamp).toLocaleString('ur-PK') : ''}</td></tr>`).join('');
+                const roleLabels = { admin: 'ایڈمن', teacher: 'استاد', accountant: 'اکاؤنٹنٹ', librarian: 'لائبریرین' };
+                body.innerHTML = logs.slice(-100).reverse().map(l => `<tr><td>${escapeHtml(l.user)}</td><td><span class="badge-${l.role === 'admin' ? 'green' : 'gold'}">${roleLabels[l.role] || l.role}</span></td><td>${escapeHtml(l.action)}</td><td>${escapeHtml(l.module)}</td><td>${escapeHtml(l.detail)}</td><td style="font-size:.72rem;white-space:nowrap">${l.timestamp ? new Date(l.timestamp).toLocaleString('ur-PK') : ''}</td></tr>`).join('');
             }
             async function clearAuditLog() {
                 if (!ensureAdminAccess('لاگ صاف')) return;
@@ -5454,7 +5613,8 @@
             }
             async function loadUsersTable() {
                 const users = await dbGetAll('users');
-                document.getElementById('usersBody').innerHTML = users.map(u => `<tr><td>${u.fullName || ''}</td><td>${u.username}</td><td><span class="badge-${u.role === 'admin' ? 'green' : 'gold'}">${u.role === 'admin' ? 'ایڈمن' : 'استاد'}</span></td><td><button class="btn-danger-soft" onclick="deleteUser(${u.id})"><i class="fa fa-trash"></i></button></td></tr>`).join('');
+                const roleLabels = { admin: 'ایڈمن', teacher: 'استاد', accountant: 'اکاؤنٹنٹ', librarian: 'لائبریرین' };
+                document.getElementById('usersBody').innerHTML = users.map(u => `<tr><td>${u.fullName || ''}</td><td>${u.username}</td><td><span class="badge-${u.role === 'admin' ? 'green' : 'gold'}">${roleLabels[u.role] || u.role}</span></td><td><button class="btn-danger-soft" onclick="deleteUser(${u.id})"><i class="fa fa-trash"></i></button></td></tr>`).join('');
             }
             async function openUserModal() {
                 document.getElementById('userId').value = '';
@@ -6027,8 +6187,37 @@
                 const status = document.getElementById('lbStatus').value;
                 if (!bookName || !studentId) { showToast('error', 'کتاب کا نام اور طالب علم ضروری ہے'); return; }
                 const data = { bookName, studentId, issueDate, dueDate, status };
-                if (id) { await dbPut('library', { ...data, id: parseInt(id) }); }
+                let oldRecord = null;
+                if (id) { oldRecord = await dbGet('library', parseInt(id)); await dbPut('library', { ...data, id: parseInt(id) }); }
                 else { await dbAdd('library', data); }
+                // Feature 16: Inventory-Library sync
+                const inventory = await dbGetAll('inventory');
+                const invItem = inventory.find(i => i.name && i.name.includes(bookName));
+                if (!id && status === 'issued' && invItem) {
+                    if (invItem.qty > 0) { invItem.qty = invItem.qty - 1; await dbPut('inventory', invItem); }
+                    else { showToast('warning', 'اسٹاک میں یہ کتاب دستیاب نہیں'); }
+                }
+                if (id && oldRecord && oldRecord.status === 'issued' && status === 'returned' && invItem) {
+                    invItem.qty = (invItem.qty || 0) + 1; await dbPut('inventory', invItem);
+                }
+                // Feature 5: Library fine automation on overdue return
+                if (status === 'returned' && dueDate) {
+                    const dueD = new Date(dueDate);
+                    const todayD = new Date();
+                    if (todayD > dueD) {
+                        const daysLate = Math.ceil((todayD - dueD) / (1000 * 60 * 60 * 24));
+                        const settings = await dbGetAll('settings');
+                        const cfg = settings[0] || {};
+                        const finePerDay = cfg.libraryFinePerDay || 10;
+                        const fineAmount = daysLate * finePerDay;
+                        const student = await dbGet('students', studentId);
+                        const res = await Swal.fire({ icon: 'info', title: 'کتاب ' + daysLate + ' دن تاخیر سے واپس', html: `جرمانہ: <b>Rs ${fineAmount}</b> (${daysLate} دن × Rs ${finePerDay})`, showCancelButton: true, confirmButtonText: 'جرمانہ لگائیں', cancelButtonText: 'معاف کریں' });
+                        if (res.isConfirmed) {
+                            await dbAdd('fines', { studentId, type: 'جرمانہ', amount: fineAmount, status: 'unpaid', date: today(), description: 'کتاب "' + bookName + '" ' + daysLate + ' دن تاخیر سے واپسی' });
+                            showToast('success', 'جرمانہ Rs ' + fineAmount + ' لگایا گیا');
+                        }
+                    }
+                }
                 bootstrap.Modal.getInstance(document.getElementById('libraryModal')).hide();
                 showToast('success', 'کتاب کا ریکارڈ محفوظ ہو گیا');
                 await loadLibraryTable();
@@ -6078,6 +6267,17 @@
                 const checkInDate = document.getElementById('hsCheckInDate').value;
                 const checkOutDate = document.getElementById('hsCheckOutDate').value;
                 if (!studentId || !room) { showToast('error', 'طالب علم اور کمرہ نمبر ضروری ہے'); return; }
+                // Feature 2: Hostel capacity check (max 4 per room)
+                if (residentStatus === 'active') {
+                    const allHostel = await dbGetAll('hostel');
+                    const roomOccupants = allHostel.filter(h => h.room === room && h.residentStatus === 'active' && (!id || h.id !== parseInt(id)));
+                    const settings = await dbGetAll('settings');
+                    const maxCapacity = (settings[0] || {}).hostelRoomCapacity || 4;
+                    if (roomOccupants.length >= maxCapacity) {
+                        showToast('error', 'کمرہ ' + room + ' میں گنجائش نہیں (' + roomOccupants.length + '/' + maxCapacity + ')');
+                        return;
+                    }
+                }
                 const data = { studentId, room, residentStatus, messFee, feeStatus, checkInDate, checkOutDate };
                 if (id) { await dbPut('hostel', { ...data, id: parseInt(id) }); }
                 else { await dbAdd('hostel', data); }
@@ -6737,10 +6937,152 @@
                     document.getElementById('gdSyncStatusText').textContent = 'پچھلی بار متصل: ' + email;
                 }
             }
+
+            // ===== Feature 10: Mark All Present/Absent for student attendance =====
+            function markAllAttendance(status) {
+                const tbody = document.getElementById('attBody');
+                if (!tbody) return;
+                const rows = tbody.querySelectorAll('tr');
+                rows.forEach(row => {
+                    const btns = row.querySelectorAll('button[data-status]');
+                    btns.forEach(b => {
+                        b.classList.remove('active', 'btn-success', 'btn-danger', 'btn-warning');
+                        b.classList.add('btn-outline-secondary');
+                        if (b.getAttribute('data-status') === status) {
+                            b.classList.remove('btn-outline-secondary');
+                            if (status === 'ح') b.classList.add('btn-success', 'active');
+                            else if (status === 'غ') b.classList.add('btn-danger', 'active');
+                            else b.classList.add('btn-warning', 'active');
+                        }
+                    });
+                    const statusCell = row.querySelector('td:last-child');
+                    if (statusCell) {
+                        const badgeClass = status === 'ح' ? 'green' : status === 'غ' ? 'red' : 'gold';
+                        const label = status === 'ح' ? 'حاضر' : status === 'غ' ? 'غائب' : 'رخصت';
+                        statusCell.innerHTML = `<span class="badge-${badgeClass}">${label}</span>`;
+                    }
+                });
+                showToast('info', status === 'ح' ? 'سب حاضر نشان زد' : 'سب غائب نشان زد');
+            }
+
+            // ===== Feature 10: Mark All Staff Attendance =====
+            function markAllStaffAtt(status) {
+                const tbody = document.getElementById('staffAttBody');
+                if (!tbody) return;
+                const rows = tbody.querySelectorAll('tr');
+                rows.forEach(row => {
+                    const btns = row.querySelectorAll('button[data-status]');
+                    btns.forEach(b => {
+                        b.classList.remove('active', 'btn-success', 'btn-danger', 'btn-warning');
+                        b.classList.add('btn-outline-secondary');
+                        if (b.getAttribute('data-status') === status) {
+                            b.classList.remove('btn-outline-secondary');
+                            b.classList.add('btn-success', 'active');
+                        }
+                    });
+                    const statusCell = row.querySelector('td:last-child');
+                    if (statusCell) statusCell.innerHTML = `<span class="badge-green">حاضر</span>`;
+                });
+                showToast('info', 'سب عملہ حاضر نشان زد');
+            }
+
+            // ===== Feature 13: Undo Last Promotion =====
+            async function undoLastPromotion() {
+                if (!ensureAdminAccess('ترقی واپس لینا')) return;
+                const promotions = await dbGetAll('promotions');
+                if (promotions.length === 0) { showToast('error', 'کوئی ترقی کا ریکارڈ نہیں'); return; }
+                const lastPromo = promotions[promotions.length - 1];
+                const daysDiff = Math.ceil((new Date() - new Date(lastPromo.date)) / (1000 * 60 * 60 * 24));
+                if (daysDiff > 30) { showToast('error', '30 دن سے زیادہ ہو چکے ہیں، واپسی ممکن نہیں'); return; }
+                const res = await Swal.fire({
+                    icon: 'warning', title: 'آخری ترقی واپس لیں؟',
+                    html: `<b>${lastPromo.studentName || ''}</b> کو <b>${lastPromo.toClass || ''}</b> سے واپس <b>${lastPromo.fromClass || ''}</b> میں منتقل کیا جائے گا`,
+                    showCancelButton: true, confirmButtonText: 'ہاں، واپس لیں', cancelButtonText: 'منسوخ', confirmButtonColor: '#c0392b'
+                });
+                if (!res.isConfirmed) return;
+                const student = await dbGet('students', lastPromo.studentId);
+                if (student) {
+                    const classes = await dbGetAll('classes');
+                    const fromCls = classes.find(c => c.name === lastPromo.fromClass);
+                    if (fromCls) {
+                        student.classId = fromCls.id;
+                        await dbPut('students', student);
+                    }
+                }
+                await dbDelete('promotions', lastPromo.id);
+                await addAuditLog('واپسی', 'ترقی', lastPromo.studentName + ' واپس ' + lastPromo.fromClass);
+                showToast('success', 'ترقی واپس لے لی گئی');
+                await loadPromotions();
+            }
+
+            // ===== Feature 17: Export Audit Log to CSV =====
+            async function exportAuditCSV() {
+                const logs = await dbGetAll('auditlog');
+                if (logs.length === 0) { showToast('error', 'لاگ خالی ہے'); return; }
+                let csv = 'User,Role,Action,Module,Detail,Timestamp\n';
+                logs.forEach(l => {
+                    csv += `"${l.user || ''}","${l.role || ''}","${l.action || ''}","${l.module || ''}","${(l.detail || '').replace(/"/g, '""')}","${l.timestamp ? new Date(l.timestamp).toISOString() : ''}"\n`;
+                });
+                const blob = new Blob(['\ufeff' + csv], { type: 'text/csv;charset=utf-8;' });
+                const a = document.createElement('a');
+                a.href = URL.createObjectURL(blob);
+                a.download = 'AuditLog_' + today() + '.csv';
+                a.click();
+                showToast('success', 'CSV ڈاؤن لوڈ ہو گیا');
+            }
+
+            // ===== Feature 9: Annual Result Card =====
+            async function generateAnnualResultCard() {
+                const studentId = parseInt(document.getElementById('genResultStudent').value) || 0;
+                if (!studentId) { showToast('error', 'طالب علم منتخب کریں'); return; }
+                const student = await dbGet('students', studentId);
+                const cls = student ? await dbGet('classes', student.classId) : null;
+                const exams = await dbGetAll('exams');
+                const year = new Date().getFullYear();
+                const studentExams = exams.filter(e => e.studentId === studentId);
+                if (studentExams.length === 0) { showToast('error', 'اس طالب علم کے کوئی امتحانی نتائج نہیں'); return; }
+                const subjects = [...new Set(studentExams.map(e => e.subject))];
+                let totalObt = 0, totalMax = 0;
+                let subjectRows = subjects.map(sub => {
+                    const subExams = studentExams.filter(e => e.subject === sub);
+                    const avg = subExams.reduce((a, e) => a + ((e.obtained / (e.total || 100)) * 100), 0) / subExams.length;
+                    const obt = subExams.reduce((a, e) => a + (e.obtained || 0), 0);
+                    const max = subExams.reduce((a, e) => a + (e.total || 0), 0);
+                    totalObt += obt; totalMax += max;
+                    const pct = Math.round(avg);
+                    let grade = 'F'; if (pct >= 90) grade = 'A+'; else if (pct >= 80) grade = 'A'; else if (pct >= 70) grade = 'B'; else if (pct >= 60) grade = 'C'; else if (pct >= 50) grade = 'D';
+                    return `<tr><td>${escapeHtml(sub)}</td><td>${subExams.length}</td><td>${max}</td><td>${obt}</td><td>${pct}%</td><td>${grade}</td></tr>`;
+                }).join('');
+                const overallPct = totalMax > 0 ? Math.round((totalObt / totalMax) * 100) : 0;
+                let overallGrade = 'F'; if (overallPct >= 90) overallGrade = 'A+'; else if (overallPct >= 80) overallGrade = 'A'; else if (overallPct >= 70) overallGrade = 'B'; else if (overallPct >= 60) overallGrade = 'C'; else if (overallPct >= 50) overallGrade = 'D';
+                const settings = await dbGetAll('settings');
+                const cfg = settings[0] || {};
+                const html = `
+                    <div style="text-align:center;direction:rtl;padding:1rem">
+                        <h4>${escapeHtml(cfg.madrasaName || 'مدرسہ')}</h4>
+                        <h5>سالانہ مجموعی رزلٹ کارڈ ${year}</h5>
+                        <hr>
+                        <p><strong>طالب علم:</strong> ${escapeHtml(student ? student.name : '')} | <strong>والد:</strong> ${escapeHtml(student ? student.fatherName : '')} | <strong>جماعت:</strong> ${cls ? escapeHtml(cls.name) : '—'}</p>
+                        <table class="table table-sm table-bordered"><thead><tr style="background:var(--green-light)"><th>مضمون</th><th>امتحانات</th><th>کل نمبر</th><th>حاصل</th><th>فیصد</th><th>گریڈ</th></tr></thead>
+                        <tbody>${subjectRows}</tbody>
+                        <tfoot><tr style="font-weight:bold;background:#f0f7f0"><td>مجموعی</td><td>${subjects.length}</td><td>${totalMax}</td><td>${totalObt}</td><td>${overallPct}%</td><td>${overallGrade}</td></tr></tfoot></table>
+                        <h5 style="margin-top:1rem">نتیجہ: <span class="badge-${overallPct >= 50 ? 'green' : 'red'}">${overallPct >= 50 ? 'پاس' : 'فیل'}</span></h5>
+                    </div>`;
+                document.getElementById('resultCardBody').innerHTML = html;
+                new bootstrap.Modal(document.getElementById('resultCardModal')).show();
+            }
+
+            // Add salary month change listener for auto-deduction calc
+            document.addEventListener('DOMContentLoaded', () => {
+                const salMonthEl = document.getElementById('salMonth');
+                if (salMonthEl) salMonthEl.addEventListener('change', onSalaryTeacherChange);
+            });
+
             setTimeout(gdRestoreUIState, 1000);
             document.addEventListener('DOMContentLoaded', () => main());
         </script>
     </div>
+
     <script type="module">
         import { Workbox } from 'https://storage.googleapis.com/workbox-cdn/releases/7.0.0/workbox-window.prod.mjs';
 
