@@ -1106,6 +1106,240 @@
                 background: rgba(255, 255, 255, 0.1);
             }
 
+            /* --- MOBILE TOPBAR --- */
+            #topbar {
+                height: 48px;
+                padding: 0 .75rem;
+                box-shadow: none;
+                border-bottom: 1px solid #e0e8e2;
+                gap: .5rem;
+            }
+
+            #topbar .page-title {
+                font-size: 1.05rem;
+                font-weight: 600;
+                white-space: nowrap;
+                overflow: hidden;
+                text-overflow: ellipsis;
+                max-width: 45vw;
+            }
+
+            #topbar .topbar-right {
+                gap: .4rem;
+            }
+
+            #topbar .btn-outline-green {
+                padding: .3rem .5rem;
+                font-size: .85rem;
+                border-radius: 8px;
+                min-width: 34px;
+                min-height: 34px;
+                display: inline-flex;
+                align-items: center;
+                justify-content: center;
+            }
+
+            #topbar .user-badge {
+                padding: .25rem .45rem;
+                gap: .3rem;
+                border-radius: 8px;
+                min-height: 34px;
+            }
+
+            #topbar .user-badge span {
+                font-size: .8rem;
+            }
+
+            #topbar .user-badge .badge-green {
+                display: none;
+            }
+
+            /* --- MOBILE ELEMENT SCALING --- */
+
+            /* Buttons */
+            .btn-primary-green {
+                padding: .4rem .9rem;
+                font-size: .85rem;
+                gap: .3rem;
+            }
+
+            .btn-gold {
+                padding: .4rem .9rem;
+                font-size: .85rem;
+                gap: .3rem;
+            }
+
+            .btn-outline-green {
+                padding: .35rem .8rem;
+                font-size: .85rem;
+                gap: .3rem;
+            }
+
+            .btn-danger-soft,
+            .btn-edit-soft {
+                padding: .25rem .6rem;
+                font-size: .72rem;
+            }
+
+            .btn-sm {
+                padding: .2rem .5rem !important;
+                font-size: .75rem !important;
+            }
+
+            /* Form Controls */
+            .form-control,
+            select.form-control,
+            .form-select {
+                padding: .4rem .7rem;
+                font-size: .85rem;
+            }
+
+            label {
+                font-size: .88rem;
+                margin-bottom: .25rem;
+            }
+
+            .input-group-text {
+                padding: .35rem .6rem;
+                font-size: .85rem;
+            }
+
+            /* Badges */
+            .badge-green,
+            .badge-gold,
+            .badge-red,
+            .badge-blue {
+                padding: .15rem .45rem;
+                font-size: .75rem;
+            }
+
+            /* Card Stats */
+            .card-stat {
+                padding: .85rem;
+                gap: .65rem;
+            }
+
+            .card-stat .stat-icon {
+                width: 42px;
+                height: 42px;
+                font-size: 1.1rem;
+                border-radius: .6rem;
+            }
+
+            .card-stat .stat-val {
+                font-size: 1.3rem;
+            }
+
+            .card-stat .stat-lbl {
+                font-size: .72rem;
+            }
+
+            /* Section Cards */
+            .section-card .sc-head {
+                padding: .5rem .75rem;
+                gap: .35rem;
+            }
+
+            .section-card .sc-head h4 {
+                font-size: .82rem;
+            }
+
+            .section-card .sc-body {
+                padding: .65rem .75rem;
+            }
+
+            /* Tables */
+            table.dataTable thead th {
+                font-size: .78rem;
+                padding: .45rem .5rem;
+            }
+
+            table.dataTable tbody td {
+                font-size: .78rem;
+                padding: .4rem .5rem;
+            }
+
+            .dataTables_wrapper .dataTables_filter input {
+                font-size: .78rem;
+                padding: .3rem .6rem;
+            }
+
+            .dataTables_wrapper .dataTables_length select {
+                font-size: .78rem;
+                padding: .25rem .4rem;
+            }
+
+            .dataTables_wrapper .dataTables_info {
+                font-size: .72rem;
+            }
+
+            .dataTables_wrapper .dataTables_paginate .paginate_button {
+                font-size: .72rem !important;
+                padding: .2rem .5rem !important;
+            }
+
+            /* Modals */
+            .modal-header {
+                padding: .7rem .9rem;
+            }
+
+            .modal-title {
+                font-size: .88rem;
+            }
+
+            .modal-body {
+                padding: .85rem .9rem;
+            }
+
+            .modal-footer {
+                padding: .5rem .9rem;
+            }
+
+            .modal-footer .btn-primary-green,
+            .modal-footer .btn-outline-green {
+                padding: .35rem .75rem;
+                font-size: .82rem;
+            }
+
+            /* Hifz stat cards */
+            .hifz-stat-cards {
+                grid-template-columns: repeat(2, 1fr);
+                gap: .5rem;
+            }
+
+            .hifz-stat {
+                padding: .7rem;
+            }
+
+            .hifz-stat .stat-num {
+                font-size: 1.3rem;
+            }
+
+            .hifz-stat .stat-label {
+                font-size: .72rem;
+            }
+
+            /* Hifz tabs */
+            .hifz-tabs button {
+                padding: .3rem .7rem;
+                font-size: .78rem;
+            }
+
+            /* Quality badges */
+            .quality-badge {
+                font-size: .7rem;
+                padding: .1rem .4rem;
+            }
+
+            /* SweetAlert */
+            .swal2-popup {
+                font-size: .85rem !important;
+            }
+
+            .swal2-title {
+                font-size: 1rem !important;
+            }
+
             .page-content {
                 padding: 1rem;
                 padding-bottom: calc(20px + 56px + var(--bottom-inset, 0px));
@@ -1118,12 +1352,107 @@
 
         @media(max-width:480px) {
             .card-stat .stat-val {
-                font-size: 1.2rem
+                font-size: 1.1rem
             }
 
             .page-content {
                 padding: .75rem;
                 padding-bottom: calc(20px + 56px + var(--bottom-inset, 0px));
+            }
+
+            /* Even more compact topbar */
+            #topbar {
+                height: 44px;
+                padding: 0 .5rem;
+            }
+
+            #topbar .page-title {
+                font-size: .95rem;
+                max-width: 40vw;
+            }
+
+            #topbar .btn-outline-green {
+                padding: .2rem .4rem;
+                font-size: .8rem;
+                min-width: 30px;
+                min-height: 30px;
+            }
+
+            #topbar .user-badge {
+                padding: .2rem .35rem;
+                min-height: 30px;
+            }
+
+            #topbar .user-badge #currentUserName {
+                display: none;
+            }
+
+            /* Even smaller elements */
+            .btn-primary-green,
+            .btn-gold {
+                padding: .3rem .7rem;
+                font-size: .78rem;
+            }
+
+            .btn-outline-green {
+                padding: .25rem .6rem;
+                font-size: .78rem;
+            }
+
+            .form-control,
+            select.form-control,
+            .form-select {
+                padding: .35rem .6rem;
+                font-size: .8rem;
+            }
+
+            label {
+                font-size: .82rem;
+            }
+
+            .card-stat {
+                padding: .65rem;
+                gap: .5rem;
+            }
+
+            .card-stat .stat-icon {
+                width: 36px;
+                height: 36px;
+                font-size: 1rem;
+            }
+
+            .card-stat .stat-lbl {
+                font-size: .68rem;
+            }
+
+            .section-card .sc-head h4 {
+                font-size: .78rem;
+            }
+
+            .section-card .sc-body {
+                padding: .5rem .6rem;
+            }
+
+            table.dataTable thead th {
+                font-size: .72rem;
+                padding: .35rem .4rem;
+            }
+
+            table.dataTable tbody td {
+                font-size: .72rem;
+                padding: .3rem .4rem;
+            }
+
+            .modal-title {
+                font-size: .82rem;
+            }
+
+            .hifz-stat-cards {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .hifz-stat .stat-num {
+                font-size: 1.1rem;
             }
 
             #sideNav a {
