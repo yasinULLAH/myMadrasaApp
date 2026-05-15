@@ -69,6 +69,14 @@ if (workbox) {
         "revision": "de3484224348da2e2436daddb82b8296"
     },
     {
+        "url": "features and functionalities.md",
+        "revision": "ad7f8b837ae43ed75c6a4de23ee83b7c"
+    },
+    {
+        "url": "features and functionalities2.md",
+        "revision": "3cb9ef8a58e89060a37190b57da19c00"
+    },
+    {
         "url": "hifz.js",
         "revision": "2c99dc26232a0917563d5bc7a9e489a5"
     },
@@ -82,7 +90,7 @@ if (workbox) {
     },
     {
         "url": "index.html",
-        "revision": "a5d494857c1d19fc14779d232fe3847b"
+        "revision": "e4e9bdacf87e15743c6247a9503eaaae"
     },
     {
         "url": "Madrasa management app apk installer.apk",
@@ -102,7 +110,7 @@ if (workbox) {
     },
     {
         "url": "readme.md",
-        "revision": "6ca764d7f53d736f2cac281f0b1ecbba"
+        "revision": "0f287a209ca30758f00afb386eadf286"
     },
     {
         "url": "readmeD.md",
@@ -110,7 +118,7 @@ if (workbox) {
     },
     {
         "url": "sw.js",
-        "revision": "1b8e69079ab5239351d53cba241c3f89"
+        "revision": "70cb13f2dedff5ef16ec39cf6843fb37"
     }
 ]);
 
