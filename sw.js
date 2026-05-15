@@ -62,7 +62,7 @@ if (workbox) {
     },
     {
         "url": "index.html",
-        "revision": "18a7b3acdb251e122bc97e3919e9df56"
+        "revision": "7a8cf366a030e790c0fa6b750f1a6797"
     },
     {
         "url": "manifest.json",
@@ -74,7 +74,7 @@ if (workbox) {
     },
     {
         "url": "sw.js",
-        "revision": "2732f9cda74dafd6557f1fbf18b806fe"
+        "revision": "3deb88ef610cac09358214111b4a18b0"
     }
 ]);
 
