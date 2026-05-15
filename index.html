@@ -1773,6 +1773,124 @@
             padding: .3rem 1rem .3rem .5rem !important;
         }
 
+        /* ===== DATATABLES RESPONSIVE EXPAND/COLLAPSE CONTROL — RTL FIX ===== */
+
+        /* Force the control column (expand icon) to the RIGHT side in RTL */
+        table.dataTable.dtr-inline.collapsed > tbody > tr > td.dtr-control,
+        table.dataTable.dtr-inline.collapsed > tbody > tr > th.dtr-control {
+            position: relative;
+            padding-right: 30px !important;
+            cursor: pointer;
+        }
+
+        /* Hide the default tiny +/- icon completely */
+        table.dataTable.dtr-inline.collapsed > tbody > tr > td.dtr-control::before,
+        table.dataTable.dtr-inline.collapsed > tbody > tr > th.dtr-control::before {
+            content: '\f078' !important;  /* fa-chevron-down */
+            font-family: 'Font Awesome 6 Free' !important;
+            font-weight: 900 !important;
+            position: absolute !important;
+            top: 50% !important;
+            right: 6px !important;
+            left: auto !important;
+            transform: translateY(-50%) !important;
+            width: 20px !important;
+            height: 20px !important;
+            display: flex !important;
+            align-items: center !important;
+            justify-content: center !important;
+            border-radius: 50% !important;
+            background: linear-gradient(135deg, var(--green-primary), var(--green-mid)) !important;
+            color: #fff !important;
+            font-size: 8px !important;
+            box-shadow: 0 1px 5px rgba(26, 107, 60, 0.3) !important;
+            border: none !important;
+            transition: all 0.25s cubic-bezier(.4,0,.2,1) !important;
+            line-height: 20px !important;
+            text-align: center !important;
+            box-sizing: border-box !important;
+            text-indent: 0 !important;
+            animation: dtExpandPulse 2s ease-in-out infinite;
+        }
+
+        /* Expanded state — rotate chevron */
+        table.dataTable.dtr-inline.collapsed > tbody > tr.parent > td.dtr-control::before,
+        table.dataTable.dtr-inline.collapsed > tbody > tr.parent > th.dtr-control::before {
+            content: '\f077' !important;  /* fa-chevron-up */
+            background: linear-gradient(135deg, var(--gold), var(--gold-dark)) !important;
+            box-shadow: 0 2px 8px rgba(201, 162, 39, 0.4) !important;
+            animation: none !important;
+        }
+
+        /* Hover state */
+        table.dataTable.dtr-inline.collapsed > tbody > tr > td.dtr-control:hover::before,
+        table.dataTable.dtr-inline.collapsed > tbody > tr > th.dtr-control:hover::before {
+            transform: translateY(-50%) scale(1.15) !important;
+            box-shadow: 0 4px 14px rgba(26, 107, 60, 0.45) !important;
+        }
+
+        /* Subtle pulse animation to draw attention */
+        @keyframes dtExpandPulse {
+            0%, 100% { box-shadow: 0 2px 8px rgba(26, 107, 60, 0.35); }
+            50% { box-shadow: 0 2px 14px rgba(26, 107, 60, 0.55), 0 0 0 4px rgba(26, 107, 60, 0.1); }
+        }
+
+        /* Style the child (detail) row */
+        table.dataTable > tbody > tr.child ul.dtr-details {
+            display: block !important;
+            width: 100%;
+            padding: 0;
+            margin: 0;
+        }
+
+        table.dataTable > tbody > tr.child ul.dtr-details > li {
+            display: flex;
+            justify-content: space-between;
+            padding: .45rem .75rem;
+            border-bottom: 1px solid #e8f0ea;
+            font-size: .82rem;
+        }
+
+        table.dataTable > tbody > tr.child ul.dtr-details > li:last-child {
+            border-bottom: none;
+        }
+
+        table.dataTable > tbody > tr.child ul.dtr-details > li .dtr-title {
+            font-weight: 600;
+            color: var(--green-dark);
+            min-width: 80px;
+        }
+
+        table.dataTable > tbody > tr.child ul.dtr-details > li .dtr-data {
+            text-align: left;
+            color: #333;
+        }
+
+        table.dataTable > tbody > tr.child {
+            background: #f8fdf9;
+        }
+
+        table.dataTable > tbody > tr.child:hover {
+            background: #f0f7f3;
+        }
+
+        /* Mobile sizes — make the icon even bigger for easy tapping */
+        @media (max-width: 768px) {
+            table.dataTable.dtr-inline.collapsed > tbody > tr > td.dtr-control::before,
+            table.dataTable.dtr-inline.collapsed > tbody > tr > th.dtr-control::before {
+                width: 22px !important;
+                height: 22px !important;
+                font-size: 9px !important;
+                line-height: 22px !important;
+                right: 4px !important;
+            }
+
+            table.dataTable.dtr-inline.collapsed > tbody > tr > td.dtr-control,
+            table.dataTable.dtr-inline.collapsed > tbody > tr > th.dtr-control {
+                padding-right: 32px !important;
+            }
+        }
+
         /* ===== COMPREHENSIVE MODAL & DIALOG MOBILE-FIRST RESPONSIVE FIX ===== */
 
         /* --- Base modal improvements (all screens) --- */
@@ -8755,6 +8873,5 @@
 <script src="./hifz2.js"></script>
 <script src="./hifz3.js"></script>
 </div>
-
 <script src="./pwa-register.js" type="module"></script></body>
 </html>
