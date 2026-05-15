@@ -61,8 +61,20 @@ if (workbox) {
         "revision": "912a9d55d74613b8f4f07180d0df1fd3"
     },
     {
+        "url": "hifz.js",
+        "revision": "dabd3d880332692a49dde3a6ce303788"
+    },
+    {
+        "url": "hifz2.js",
+        "revision": "57e1fabc84fe8bfa5554f0a1b8f1a9c3"
+    },
+    {
+        "url": "hifz3.js",
+        "revision": "6747e43a2ba4e264fe72639383a67b02"
+    },
+    {
         "url": "index.html",
-        "revision": "0e6da9fbfaf3e85122b325714486988e"
+        "revision": "f1dcb6b8185f94f45a731a7d730ed6fb"
     },
     {
         "url": "manifest.json",
@@ -74,7 +86,7 @@ if (workbox) {
     },
     {
         "url": "sw.js",
-        "revision": "8842b2035b980e7a8074e4fdee40fa7e"
+        "revision": "fcf0ffa687fe62a0e3d5aeeae2dcb626"
     }
 ]);
 
