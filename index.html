@@ -931,11 +931,13 @@
 
             body {
                 overflow-x: clip !important;
+                min-height: auto;
             }
 
             .app-wrapper {
                 overflow-x: clip;
                 width: 100%;
+                min-height: auto;
             }
 
             .page-view,
@@ -1001,6 +1003,11 @@
                 margin-right: 0 !important;
                 margin-bottom: calc(56px + var(--bottom-inset, 0px));
                 min-height: auto;
+                transition: margin-bottom 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            }
+
+            #main-content.nav-hidden {
+                margin-bottom: 0;
             }
 
             .menu-toggle {
@@ -4764,10 +4771,13 @@
             window.addEventListener('scroll', () => {
                 if (window.innerWidth <= 768) {
                     const sidebar = document.getElementById('sidebar');
+                    const mainContent = document.getElementById('main-content');
                     if (window.scrollY > lastScrollY && window.scrollY > 50) {
                         sidebar.classList.add('hidden-scroll');
+                        mainContent.classList.add('nav-hidden');
                     } else {
                         sidebar.classList.remove('hidden-scroll');
+                        mainContent.classList.remove('nav-hidden');
                     }
                 }
                 lastScrollY = window.scrollY;
