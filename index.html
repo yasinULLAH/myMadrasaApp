@@ -425,6 +425,20 @@
             color: #fff
         }
 
+        td .btn-outline-green.btn-sm {
+            padding: .35rem .85rem;
+            font-size: .8rem;
+            min-width: unset;
+            min-height: unset;
+        }
+
+        td .btn-outline-green.btn-sm,
+        td .btn-edit-soft,
+        td .btn-danger-soft {
+            line-height: 1;
+            vertical-align: middle;
+        }
+
         .form-control,
         select.form-control,
         .form-select {
@@ -434,6 +448,12 @@
             font-size: 1rem;
             font-family: var(--font-urdu);
             transition: border-color var(--transition), box-shadow var(--transition)
+        }
+
+        .form-select {
+            background-position: left .75rem center;
+            padding-left: 2.25rem;
+            padding-right: .85rem;
         }
 
         .form-control:focus,
@@ -488,7 +508,9 @@
         }
 
         table.dataTable {
-            direction: rtl
+            direction: rtl;
+            border-collapse: collapse;
+            border: 1px solid #dce5df
         }
 
         table.dataTable thead th {
@@ -496,7 +518,7 @@
             color: var(--green-dark);
             font-size: 1.05rem;
             font-weight: 600;
-            border-bottom: 2px solid #c3deca;
+            border: 1px solid #c3deca;
             white-space: nowrap
         }
 
@@ -511,8 +533,22 @@
         table.dataTable tbody td {
             font-size: 1rem;
             vertical-align: middle;
-            border-bottom: 1px solid #eef3f0;
+            border: 1px solid #e8ede9;
             padding: .6rem .75rem
+        }
+
+        .page-content .table th,
+        .page-content .table td {
+            border: 1px solid #e8ede9
+        }
+
+        .page-content .table thead th {
+            border-color: #c3deca
+        }
+
+        .page-content .table {
+            border-collapse: collapse;
+            border: 1px solid #dce5df
         }
 
         .dataTables_wrapper .dataTables_filter input {
@@ -525,7 +561,16 @@
         .dataTables_wrapper .dataTables_length select {
             border: 1px solid #d4ddd6;
             border-radius: var(--radius);
-            padding: .3rem .5rem
+            padding: .3rem 1.8rem .3rem .5rem;
+            appearance: none;
+            -webkit-appearance: none;
+            -moz-appearance: none;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23555' d='M6 8L1 3h10z'/%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: left .5rem center;
+            background-size: 10px;
+            min-width: 65px;
+            text-align: center
         }
 
         .dataTables_wrapper .dataTables_paginate .paginate_button.current {
@@ -539,6 +584,41 @@
             background: var(--green-light) !important;
             color: var(--green-dark) !important;
             border-color: #c3deca
+        }
+
+        td:last-child {
+            white-space: nowrap;
+        }
+
+        @media (max-width: 768px) {
+            .dataTables_wrapper .row:first-child {
+                flex-direction: column;
+                gap: .5rem;
+            }
+
+            .dataTables_wrapper .row:first-child>div {
+                width: 100% !important;
+                max-width: 100% !important;
+                flex: 0 0 100%;
+            }
+
+            .dataTables_wrapper .row:last-child {
+                flex-direction: column;
+                gap: .35rem;
+                text-align: center;
+            }
+
+            .dataTables_wrapper .row:last-child>div {
+                width: 100% !important;
+                max-width: 100% !important;
+                flex: 0 0 100%;
+            }
+
+            .dataTables_wrapper .dataTables_paginate {
+                justify-content: center;
+                display: flex;
+                flex-wrap: wrap;
+            }
         }
 
         .modal-content {
@@ -925,8 +1005,6 @@
         }
 
         @media(max-width:768px) {
-
-            /* --- GLOBAL MOBILE OVERFLOW FIX --- */
             html {
                 overflow-x: clip !important;
             }
@@ -961,7 +1039,6 @@
                 max-width: 100%;
             }
 
-            /* DataTables overflow */
             .dataTables_wrapper {
                 overflow-x: auto;
                 max-width: 100%;
@@ -973,10 +1050,6 @@
                 max-width: 100%;
             }
 
-            /* --- BOTTOM NAV BAR --- 
-               --bottom-inset is set by JavaScript via visualViewport API
-               to handle Chrome Android bottom toolbar offset.
-               Falls back to 0px if JS hasn't run. */
             #sidebar {
                 transform: translateY(0);
                 top: auto;
@@ -1041,7 +1114,6 @@
                 display: none;
             }
 
-            /* === ICON-ONLY NAV ITEMS === */
             #sideNav a {
                 flex: 0 0 48px;
                 display: flex;
@@ -1083,7 +1155,6 @@
                 flex-shrink: 0;
             }
 
-            /* Active state */
             #sideNav a.active {
                 color: #fff;
                 background: transparent;
@@ -1096,7 +1167,6 @@
                 box-shadow: 0 0 12px rgba(201, 162, 39, 0.15);
             }
 
-            /* Active dot indicator */
             #sideNav a.active::after {
                 content: '';
                 position: absolute;
@@ -1110,13 +1180,11 @@
                 box-shadow: 0 0 6px rgba(201, 162, 39, 0.5);
             }
 
-            /* Pressed feedback */
             #sideNav a:active i {
                 transform: scale(0.88);
                 background: rgba(255, 255, 255, 0.1);
             }
 
-            /* --- MOBILE TOPBAR --- */
             #topbar {
                 height: 48px;
                 padding: 0 .75rem;
@@ -1164,9 +1232,6 @@
                 display: none;
             }
 
-            /* --- MOBILE ELEMENT SCALING --- */
-
-            /* Buttons */
             .btn-primary-green {
                 padding: .4rem .9rem;
                 font-size: .85rem;
@@ -1196,7 +1261,6 @@
                 font-size: .75rem !important;
             }
 
-            /* Form Controls */
             .form-control,
             select.form-control,
             .form-select {
@@ -1214,7 +1278,6 @@
                 font-size: .85rem;
             }
 
-            /* Badges */
             .badge-green,
             .badge-gold,
             .badge-red,
@@ -1223,7 +1286,6 @@
                 font-size: .75rem;
             }
 
-            /* Card Stats */
             .card-stat {
                 padding: .85rem;
                 gap: .65rem;
@@ -1244,7 +1306,6 @@
                 font-size: .72rem;
             }
 
-            /* Section Cards */
             .section-card .sc-head {
                 padding: .5rem .75rem;
                 gap: .35rem;
@@ -1258,7 +1319,6 @@
                 padding: .65rem .75rem;
             }
 
-            /* Tables */
             table.dataTable thead th {
                 font-size: .78rem;
                 padding: .45rem .5rem;
@@ -1276,7 +1336,15 @@
 
             .dataTables_wrapper .dataTables_length select {
                 font-size: .78rem;
-                padding: .25rem .4rem;
+                padding: .25rem 1.6rem .25rem .4rem;
+                min-width: 58px;
+            }
+
+            td .btn-outline-green.btn-sm,
+            td .btn-edit-soft,
+            td .btn-danger-soft {
+                padding: .25rem .55rem;
+                font-size: .72rem;
             }
 
             .dataTables_wrapper .dataTables_info {
@@ -1288,7 +1356,6 @@
                 padding: .2rem .5rem !important;
             }
 
-            /* Modals */
             .modal-header {
                 padding: .7rem .9rem;
             }
@@ -1311,7 +1378,6 @@
                 font-size: .82rem;
             }
 
-            /* Hifz stat cards */
             .hifz-stat-cards {
                 grid-template-columns: repeat(2, 1fr);
                 gap: .5rem;
@@ -1329,19 +1395,16 @@
                 font-size: .72rem;
             }
 
-            /* Hifz tabs */
             .hifz-tabs button {
                 padding: .3rem .7rem;
                 font-size: .78rem;
             }
 
-            /* Quality badges */
             .quality-badge {
                 font-size: .7rem;
                 padding: .1rem .4rem;
             }
 
-            /* SweetAlert */
             .swal2-popup {
                 font-size: .85rem !important;
             }
@@ -1370,7 +1433,6 @@
                 padding-bottom: .75rem;
             }
 
-            /* Even more compact topbar */
             #topbar {
                 height: 44px;
                 padding: 0 .5rem;
@@ -1397,7 +1459,6 @@
                 display: none;
             }
 
-            /* Even smaller elements */
             .btn-primary-green,
             .btn-gold {
                 padding: .3rem .7rem;
@@ -2308,7 +2369,6 @@
                         </div>
                     </div>
                 </div>
-                <!-- ====== HIFZ DEPARTMENT PAGE ====== -->
                 <div class="page-view" id="page-hifz">
                     <div class="hifz-stat-cards" id="hifzStatCards"></div>
                     <div class="section-card animate__animated animate__fadeInUp">
@@ -2326,7 +2386,6 @@
                                 <button onclick="switchHifzTab('evaluations')"><i
                                         class="fa fa-clipboard-check me-1"></i> امتحانات و جائزہ</button>
                             </div>
-                            <!-- Tab 1: Hifz Students -->
                             <div id="hifzTab-students">
                                 <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-3">
                                     <div class="d-flex gap-2 flex-wrap">
@@ -2360,7 +2419,6 @@
                                     </table>
                                 </div>
                             </div>
-                            <!-- Tab 2: Daily Progress -->
                             <div id="hifzTab-progress" style="display:none">
                                 <div class="row g-2 mb-3 align-items-center">
                                     <div class="col-auto">
@@ -2395,7 +2453,6 @@
                                     </table>
                                 </div>
                             </div>
-                            <!-- Tab 3: Juz Grid Tracker -->
                             <div id="hifzTab-juzgrid" style="display:none">
                                 <div class="row g-2 mb-3 align-items-center">
                                     <div class="col-auto">
@@ -2426,7 +2483,6 @@
                                 </div>
                                 <div class="juz-grid" id="hifzJuzGridArea"></div>
                             </div>
-                            <!-- Tab 4: Evaluations -->
                             <div id="hifzTab-evaluations" style="display:none">
                                 <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-3">
                                     <div class="d-flex gap-2 flex-wrap">
@@ -4400,7 +4456,6 @@
                 </div>
             </div>
         </div>
-        <!-- Hifz Enrollment Modal -->
         <div class="modal fade" id="hifzEnrollModal" tabindex="-1">
             <div class="modal-dialog">
                 <div class="modal-content animate__animated animate__zoomIn">
@@ -4489,7 +4544,6 @@
                 </div>
             </div>
         </div>
-        <!-- Hifz Progress Modal -->
         <div class="modal fade" id="hifzProgressModal" tabindex="-1">
             <div class="modal-dialog modal-lg">
                 <div class="modal-content animate__animated animate__zoomIn">
@@ -4598,7 +4652,6 @@
                 </div>
             </div>
         </div>
-        <!-- Hifz Evaluation Modal -->
         <div class="modal fade" id="hifzEvalModal" tabindex="-1">
             <div class="modal-dialog">
                 <div class="modal-content animate__animated animate__zoomIn">
@@ -5237,7 +5290,6 @@
                 }
                 lastScrollY = window.scrollY;
             }, { passive: true });
-
             /* === Chrome Android Bottom Toolbar Detection ===
                Uses visualViewport API to detect if Chrome's address bar
                is at the bottom and adjusts --bottom-inset accordingly. */
@@ -5249,8 +5301,6 @@
                     }
                     if (window.visualViewport) {
                         const vv = window.visualViewport;
-                        // offsetTop = how much the visual viewport is scrolled from the top of layout viewport
-                        // The bottom gap = layoutViewport height - (visual viewport top + visual viewport height)
                         const layoutH = document.documentElement.clientHeight;
                         const visualBottom = vv.offsetTop + vv.height;
                         const bottomGap = Math.max(0, Math.round(layoutH - visualBottom));
@@ -5265,7 +5315,6 @@
                 }
                 window.addEventListener('resize', updateBottomInset);
                 window.addEventListener('orientationchange', updateBottomInset);
-                // Run on load and after a short delay (Chrome may report late)
                 updateBottomInset();
                 setTimeout(updateBottomInset, 300);
                 setTimeout(updateBottomInset, 1000);
@@ -5549,7 +5598,7 @@
                 safeDTDestroy(id);
                 const el = document.getElementById(id);
                 if (!el) return;
-                dtInstances[id] = $(el).DataTable({ responsive: true, language: { url: '', search: 'تلاش:', lengthMenu: '_MENU_ فی صفحہ', info: '_START_ تا _END_ از _TOTAL_', paginate: { next: 'اگلا', previous: 'پچھلا' }, zeroRecords: 'کوئی ریکارڈ نہیں' }, dom: "<'row'<'col-sm-6'l><'col-sm-6'f>><'row'<'col-sm-12'tr>><'row'<'col-sm-5'i><'col-sm-7'p>>", pageLength: 10 });
+                dtInstances[id] = $(el).DataTable({ responsive: true, stateSave: true, stateDuration: 60 * 60 * 24 * 7, language: { url: '', search: 'تلاش:', lengthMenu: '_MENU_ فی صفحہ', info: '_START_ تا _END_ از _TOTAL_', paginate: { next: 'اگلا', previous: 'پچھلا' }, zeroRecords: 'کوئی ریکارڈ نہیں' }, dom: "<'row'<'col-sm-6'l><'col-sm-6'f>><'row'<'col-sm-12'tr>><'row'<'col-sm-5'i><'col-sm-7'p>>", pageLength: 10 });
             }
             async function loadStudentsTable() {
                 const classFilter = document.getElementById('filterStudentClass').value;
@@ -8321,6 +8370,7 @@
         <script src="./hifz2.js"></script>
         <script src="./hifz3.js"></script>
     </div>
+
     <script src="./pwa-register.js" type="module"></script>
 </body>
 
