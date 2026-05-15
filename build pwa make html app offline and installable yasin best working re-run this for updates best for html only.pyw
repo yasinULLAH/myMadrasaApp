@@ -83,7 +83,7 @@ def discover_assets(project_dir, generated_icons):
         for file in files:
             file_path = os.path.join(root, file)
             relative_path = os.path.relpath(file_path, project_dir).replace("\\", "/")
-            if relative_path in existing_urls:
+            if relative_path in existing_urls or file == "version.json":
                 continue
             if file.endswith(".html"):
                 html_files.append(file_path)
@@ -177,25 +177,33 @@ if (workbox) {{
 
 def update_html_files(html_files):
     print("\n--- 5. Updating HTML Files ---")
+    import time
+    version_data = {"version": int(time.time())}
+    with open(os.path.join(PROJECT_DIR, "version.json"), 'w', encoding='utf-8') as f:
+        json.dump(version_data, f)
+        
     manifest_link_str = '<link rel="manifest" href="manifest.json">'
     favicon_link_str = '<link rel="icon" type="image/x-icon" href="favicon.ico">'
     sw_script_str = f"""<script type="module">
   import {{ Workbox }} from 'https://storage.googleapis.com/workbox-cdn/releases/7.0.0/workbox-window.prod.mjs';
 
-  const swUrl = './sw.js';
-  const wb = new Workbox(swUrl);
+  function registerSW(swUrl) {{
+    const wb = new Workbox(swUrl);
+    wb.addEventListener('waiting', () => {{
+      console.log('A new service worker is waiting to activate.');
+      wb.messageSW({{ type: 'SKIP_WAITING' }});
+    }});
+    wb.addEventListener('controlling', () => {{
+      console.log('The new service worker is now in control. Reloading page for updates...');
+      window.location.reload();
+    }});
+    wb.register();
+  }}
 
-  wb.addEventListener('waiting', () => {{
-    console.log('A new service worker is waiting to activate.');
-    wb.messageSW({{ type: 'SKIP_WAITING' }});
-  }});
-
-  wb.addEventListener('controlling', () => {{
-    console.log('The new service worker is now in control. Reloading page for updates...');
-    window.location.reload();
-  }});
-
-  wb.register();
+  fetch('./version.json?t=' + new Date().getTime())
+    .then(r => r.json())
+    .then(data => registerSW('./sw.js?v=' + data.version))
+    .catch(() => registerSW('./sw.js'));
 </script>"""
     for html_path in html_files:
         try:
