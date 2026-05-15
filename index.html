@@ -44,7 +44,8 @@
         html {
             scroll-behavior: smooth;
             -webkit-text-size-adjust: none;
-            overflow-x: hidden
+            overflow-x: clip;
+            overflow-y: auto
         }
 
         body {
@@ -53,9 +54,8 @@
             color: #1a2e22;
             min-height: 100vh;
             direction: rtl;
-            overflow-x: hidden;
-            width: 100%;
-            max-width: 100vw
+            overflow-x: clip;
+            width: 100%
         }
 
         .latin {
@@ -925,56 +925,81 @@
         @media(max-width:768px) {
 
             /* --- GLOBAL MOBILE OVERFLOW FIX --- */
-            html, body {
-                overflow-x: hidden !important;
-                width: 100% !important;
-                max-width: 100vw !important;
+            html {
+                overflow-x: clip !important;
+            }
+
+            body {
+                overflow-x: clip !important;
             }
 
             .app-wrapper {
-                overflow-x: hidden;
+                overflow-x: clip;
                 width: 100%;
-                max-width: 100vw;
             }
 
-            .page-view {
-                overflow-x: hidden;
+            .page-view,
+            #main-content,
+            .page-content,
+            .section-card,
+            .sc-body {
+                overflow-x: clip;
                 max-width: 100%;
             }
 
             .row {
-                margin-left: 0;
-                margin-right: 0;
+                margin-left: 0 !important;
+                margin-right: 0 !important;
+                max-width: 100%;
             }
 
-            /* --- BOTTOM NAV BAR --- */
+            .row > * {
+                max-width: 100%;
+            }
+
+            /* DataTables overflow */
+            .dataTables_wrapper {
+                overflow-x: auto;
+                max-width: 100%;
+            }
+
+            .table-responsive {
+                overflow-x: auto;
+                -webkit-overflow-scrolling: touch;
+                max-width: 100%;
+            }
+
+            /* --- BOTTOM NAV BAR --- 
+               --bottom-inset is set by JavaScript via visualViewport API
+               to handle Chrome Android bottom toolbar offset.
+               Falls back to 0px if JS hasn't run. */
             #sidebar {
                 transform: translateY(0);
                 top: auto;
-                bottom: 0;
+                bottom: var(--bottom-inset, 0px);
                 left: 0;
                 right: 0;
                 width: 100%;
-                height: calc(56px + env(safe-area-inset-bottom, 0px));
-                max-height: calc(56px + env(safe-area-inset-bottom, 0px));
+                height: 56px;
+                max-height: 56px;
                 flex-direction: row;
-                padding-bottom: env(safe-area-inset-bottom, 0px);
+                padding-bottom: 0;
                 z-index: 10000;
-                transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+                transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), bottom 0.15s ease;
                 box-shadow: 0 -4px 24px rgba(0, 0, 0, 0.35);
                 overflow: visible;
                 background: linear-gradient(180deg, #1a5c35 0%, var(--green-dark) 100%);
                 border-top: 1px solid rgba(255,255,255,0.1);
+                overflow-y: hidden;
             }
 
             #sidebar.hidden-scroll {
-                transform: translateY(100%);
+                transform: translateY(calc(100% + var(--bottom-inset, 0px)));
             }
 
             #main-content {
                 margin-right: 0 !important;
-                margin-bottom: calc(56px + env(safe-area-inset-bottom, 0px));
-                overflow-x: hidden;
+                margin-bottom: calc(56px + var(--bottom-inset, 0px));
             }
 
             .menu-toggle {
@@ -992,7 +1017,7 @@
                 flex-direction: row;
                 width: 100%;
                 height: 56px;
-                padding: 0 4px;
+                padding: 0 2px;
                 overflow-x: auto;
                 overflow-y: hidden;
                 scroll-snap-type: x mandatory;
@@ -1065,7 +1090,7 @@
             #sideNav a.active::after {
                 content: '';
                 position: absolute;
-                bottom: 1px;
+                bottom: 2px;
                 left: 50%;
                 transform: translateX(-50%);
                 width: 4px;
@@ -1083,24 +1108,11 @@
 
             .page-content {
                 padding: 1rem;
-                padding-bottom: calc(16px + 56px + env(safe-area-inset-bottom, 0px));
-                overflow-x: hidden;
+                padding-bottom: calc(20px + 56px + var(--bottom-inset, 0px));
             }
 
             .hide-mobile {
                 display: none
-            }
-
-            /* Fix Bootstrap row overflow on mobile */
-            .section-card {
-                overflow-x: hidden;
-                max-width: 100%;
-            }
-
-            /* Fix DataTables overflow */
-            .dataTables_wrapper {
-                overflow-x: hidden;
-                max-width: 100%;
             }
         }
 
@@ -1111,7 +1123,7 @@
 
             .page-content {
                 padding: .75rem;
-                padding-bottom: calc(16px + 56px + env(safe-area-inset-bottom, 0px));
+                padding-bottom: calc(20px + 56px + var(--bottom-inset, 0px));
             }
 
             #sideNav a {
@@ -4430,6 +4442,39 @@
                 }
                 lastScrollY = window.scrollY;
             }, { passive: true });
+
+            /* === Chrome Android Bottom Toolbar Detection ===
+               Uses visualViewport API to detect if Chrome's address bar
+               is at the bottom and adjusts --bottom-inset accordingly. */
+            (function initBottomInset() {
+                function updateBottomInset() {
+                    if (window.innerWidth > 768) {
+                        document.documentElement.style.setProperty('--bottom-inset', '0px');
+                        return;
+                    }
+                    if (window.visualViewport) {
+                        const vv = window.visualViewport;
+                        // offsetTop = how much the visual viewport is scrolled from the top of layout viewport
+                        // The bottom gap = layoutViewport height - (visual viewport top + visual viewport height)
+                        const layoutH = document.documentElement.clientHeight;
+                        const visualBottom = vv.offsetTop + vv.height;
+                        const bottomGap = Math.max(0, Math.round(layoutH - visualBottom));
+                        document.documentElement.style.setProperty('--bottom-inset', bottomGap + 'px');
+                    } else {
+                        document.documentElement.style.setProperty('--bottom-inset', '0px');
+                    }
+                }
+                if (window.visualViewport) {
+                    window.visualViewport.addEventListener('resize', updateBottomInset);
+                    window.visualViewport.addEventListener('scroll', updateBottomInset);
+                }
+                window.addEventListener('resize', updateBottomInset);
+                window.addEventListener('orientationchange', updateBottomInset);
+                // Run on load and after a short delay (Chrome may report late)
+                updateBottomInset();
+                setTimeout(updateBottomInset, 300);
+                setTimeout(updateBottomInset, 1000);
+            })();
             function showToast(type, msg) {
                 const icons = { success: 'success', error: 'error', warning: 'warning', info: 'info' };
                 Swal.fire({ toast: true, position: 'top-end', icon: icons[type] || 'info', title: msg, showConfirmButton: false, timer: 3000, timerProgressBar: true, customClass: { popup: 'swal2-toast-custom' } });
