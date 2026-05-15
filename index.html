@@ -747,6 +747,38 @@
         }
 
         @media(min-width:769px) {
+
+            /*
+             * Scrollbar position fix:
+             * - Make #main-content the scroll container so its scrollbar sits at
+             *   the inner edge (right side of content, next to sidebar) — close to what it scrolls.
+             * - Move sidebar scrollbar to the outer edge (far right, screen border).
+             * Result: content-scrollbar | SIDEBAR CONTENT | sidebar-scrollbar
+             */
+            html,
+            body {
+                overflow: hidden;
+                height: 100vh;
+            }
+
+            #main-content {
+                overflow-y: auto;
+                height: 100vh;
+                direction: ltr;
+            }
+
+            #main-content>* {
+                direction: rtl;
+            }
+
+            #sidebar {
+                direction: ltr;
+            }
+
+            #sidebar>* {
+                direction: rtl;
+            }
+
             #sidebar.collapsed {
                 width: 60px;
             }
@@ -6981,7 +7013,6 @@
             document.addEventListener('DOMContentLoaded', () => main());
         </script>
 </div>
-
 <script type="module">
   import { Workbox } from 'https://storage.googleapis.com/workbox-cdn/releases/7.0.0/workbox-window.prod.mjs';
 
