@@ -52,7 +52,7 @@
             font-family: var(--font-urdu);
             background: #f4f7f5;
             color: #1a2e22;
-            min-height: 100vh;
+            min-height: 100dvh;
             direction: rtl;
             overflow-x: clip;
             width: 100%
@@ -98,7 +98,7 @@
 
         .app-wrapper {
             display: flex;
-            min-height: 100vh
+            min-height: 100dvh
         }
 
         #sidebar {
@@ -203,7 +203,7 @@
             flex: 1;
             display: flex;
             flex-direction: column;
-            min-height: 100vh;
+            min-height: 100dvh;
             transition: margin-right .3s cubic-bezier(.4, 0, .2, 1)
         }
 
@@ -1000,6 +1000,7 @@
             #main-content {
                 margin-right: 0 !important;
                 margin-bottom: calc(56px + var(--bottom-inset, 0px));
+                min-height: auto;
             }
 
             .menu-toggle {
@@ -1342,7 +1343,7 @@
 
             .page-content {
                 padding: 1rem;
-                padding-bottom: calc(20px + 56px + var(--bottom-inset, 0px));
+                padding-bottom: 1rem;
             }
 
             .hide-mobile {
@@ -1357,7 +1358,7 @@
 
             .page-content {
                 padding: .75rem;
-                padding-bottom: calc(20px + 56px + var(--bottom-inset, 0px));
+                padding-bottom: .75rem;
             }
 
             /* Even more compact topbar */
