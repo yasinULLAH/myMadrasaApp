@@ -59,32 +59,27 @@
         }
 
         ::-webkit-scrollbar {
-            width: 8px;
-            height: 8px
+            width: 5px;
+            height: 5px
         }
 
         ::-webkit-scrollbar-track {
-            background: #e2e8e4;
-            border-radius: 4px
+            background: #e8ece9;
+            border-radius: 3px
         }
 
         ::-webkit-scrollbar-thumb {
             background: #6b8c72;
-            border-radius: 4px;
-            border: 1px solid #e2e8e4
+            border-radius: 3px
         }
 
         ::-webkit-scrollbar-thumb:hover {
             background: #4a6b52
         }
 
-        ::-webkit-scrollbar-thumb:active {
-            background: var(--green-dark)
-        }
-
         * {
-            scrollbar-width: auto;
-            scrollbar-color: #6b8c72 #e2e8e4
+            scrollbar-width: thin;
+            scrollbar-color: #6b8c72 #e8ece9
         }
 
         a {
@@ -112,7 +107,7 @@
             z-index: 1000;
             display: flex;
             flex-direction: column;
-            transition: width .3s cubic-bezier(.4,0,.2,1), transform .3s cubic-bezier(.4,0,.2,1);
+            transition: width .3s cubic-bezier(.4, 0, .2, 1), transform .3s cubic-bezier(.4, 0, .2, 1);
             overflow-y: auto;
             overflow-x: hidden
         }
@@ -205,7 +200,7 @@
             display: flex;
             flex-direction: column;
             min-height: 100vh;
-            transition: margin-right .3s cubic-bezier(.4,0,.2,1)
+            transition: margin-right .3s cubic-bezier(.4, 0, .2, 1)
         }
 
         #topbar {
@@ -795,7 +790,7 @@
                 font-size: .85rem;
                 white-space: nowrap;
                 z-index: 9999;
-                box-shadow: 0 2px 8px rgba(0,0,0,.25);
+                box-shadow: 0 2px 8px rgba(0, 0, 0, .25);
                 pointer-events: none;
             }
 
@@ -964,7 +959,7 @@
                 font-size: .65rem;
                 gap: .2rem;
                 scroll-snap-align: start;
-                color: rgba(255,255,255,.7);
+                color: rgba(255, 255, 255, .7);
                 letter-spacing: 0;
                 -webkit-tap-highlight-color: transparent;
             }
@@ -973,7 +968,7 @@
                 width: auto;
                 font-size: 1.2rem;
                 margin: 0;
-                color: rgba(255,255,255,.75);
+                color: rgba(255, 255, 255, .75);
             }
 
             #sideNav a.active {
