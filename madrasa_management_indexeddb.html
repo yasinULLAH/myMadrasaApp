@@ -230,11 +230,33 @@
 
       .select2-container .select2-selection--single,
       .select2-container .select2-selection--multiple {
-        min-height: 44px;
-        border: 1px solid #cbd5e1;
-        border-radius: .9rem;
-        display: flex;
-        align-items: center
+        min-height: 44px !important;
+        border: 1px solid #cbd5e1 !important;
+        border-radius: .9rem !important;
+        display: flex !important;
+        align-items: center !important;
+        padding: 0 .75rem !important;
+        background-color: #fff !important;
+      }
+
+      .select2-container--default .select2-selection--single .select2-selection__rendered {
+        line-height: normal !important;
+        padding: 0 !important;
+        color: #0f172a !important;
+      }
+
+      .select2-container--default .select2-selection--single .select2-selection__arrow {
+        height: 100% !important;
+        top: 0 !important;
+        left: 8px !important; /* RTL */
+        right: auto !important;
+        display: flex !important;
+        align-items: center !important;
+      }
+
+      [dir="rtl"] .select2-selection__rendered {
+        text-align: right !important;
+        padding-right: 0 !important;
       }
 
       .modal-bg {

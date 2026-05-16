@@ -758,7 +758,77 @@
         }
 
         .select2-container--bootstrap-5 .select2-selection {
-            font-family: var(--font-urdu)
+            font-family: var(--font-urdu);
+            min-height: 46px !important;
+            border: 1px solid #d4ddd6 !important;
+            border-radius: var(--radius) !important;
+            display: flex !important;
+            align-items: center !important;
+            transition: border-color var(--transition), box-shadow var(--transition) !important;
+        }
+
+        .select2-container--bootstrap-5.select2-container--focus .select2-selection,
+        .select2-container--bootstrap-5.select2-container--open .select2-selection {
+            border-color: var(--green-primary) !important;
+            box-shadow: 0 0 0 3px rgba(26, 107, 60, .12) !important;
+        }
+
+        .select2-container--bootstrap-5 .select2-selection--single {
+            padding-right: .85rem !important;
+            padding-left: 2.25rem !important;
+        }
+
+        .select2-container--bootstrap-5 .select2-selection--single .select2-selection__rendered {
+            padding: 0 !important;
+            line-height: normal !important;
+            color: inherit !important;
+        }
+
+        .select2-container--bootstrap-5 .select2-selection--single .select2-selection__arrow {
+            left: .75rem !important;
+            right: auto !important;
+            width: 1.25rem !important;
+            height: 1.25rem !important;
+            position: absolute !important;
+            top: 50% !important;
+            transform: translateY(-50%) !important;
+            background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3e%3cpath fill='none' stroke='%23343a40' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='m2 5 6 6 6-6'/%3e%3c/svg%3e") !important;
+            background-repeat: no-repeat !important;
+            background-position: center !important;
+            background-size: 12px 12px !important;
+        }
+
+        .select2-container--bootstrap-5 .select2-selection--single .select2-selection__arrow b {
+            display: none !important;
+        }
+
+        /* Small Size Support */
+        .select2-container--bootstrap-5.select2-container--sm .select2-selection,
+        select.form-select-sm + .select2-container--bootstrap-5 .select2-selection {
+            min-height: 34px !important;
+            font-size: .875rem !important;
+            padding-right: .5rem !important;
+        }
+
+        .select2-container--bootstrap-5.select2-container--sm .select2-selection--single .select2-selection__arrow,
+        select.form-select-sm + .select2-container--bootstrap-5 .select2-selection--single .select2-selection__arrow {
+            left: .5rem !important;
+        }
+
+        .select2-dropdown {
+            border-color: #d4ddd6 !important;
+            border-radius: var(--radius) !important;
+            box-shadow: var(--shadow) !important;
+            font-family: var(--font-urdu) !important;
+        }
+
+        .select2-search__field {
+            border-radius: .25rem !important;
+            border: 1px solid #d4ddd6 !important;
+        }
+
+        .select2-results__option--highlighted[aria-selected] {
+            background-color: var(--green-primary) !important;
         }
 
         .jv-error {
