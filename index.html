@@ -65,27 +65,27 @@
         }
 
         ::-webkit-scrollbar {
-            width: 5px;
-            height: 5px
+            width: 4px;
+            height: 4px
         }
 
         ::-webkit-scrollbar-track {
-            background: #e8ece9;
-            border-radius: 3px
+            background: transparent;
         }
 
         ::-webkit-scrollbar-thumb {
-            background: #6b8c72;
-            border-radius: 3px
+            background: #b0c4b5;
+            border-radius: 4px
         }
 
         ::-webkit-scrollbar-thumb:hover {
-            background: #4a6b52
+            background: #6b8c72;
+            width: 7px
         }
 
         * {
             scrollbar-width: thin;
-            scrollbar-color: #6b8c72 #e8ece9
+            scrollbar-color: #b0c4b5 transparent
         }
 
         a {
@@ -651,13 +651,17 @@
         }
 
         #loginPage {
-            min-height: 100vh;
+            height: 100vh;
             background: linear-gradient(135deg, var(--green-dark) 0%, var(--green-primary) 50%, var(--green-mid) 100%);
             display: flex;
+            flex-direction: column;
             align-items: center;
-            justify-content: center;
-            padding: 1rem
+            padding: 4vh 1rem 2rem;
+            overflow-y: auto;
+            -webkit-overflow-scrolling: touch
         }
+        #loginPage .login-box { margin: 0 auto; }
+        .animate__animated { animation-duration: 0.01s !important; animation-fill-mode: none !important; }
 
         .login-box {
             background: #fff;
@@ -2465,6 +2469,16 @@
             font-weight: 600 !important;
         }
 
+        #autoSyncToggle:checked+span { background: var(--green-primary); }
+        #autoSyncToggle:checked+span:before { transform: translateX(-20px); }
+        #autoSyncToggle+span:before { position:absolute;content:'';height:18px;width:18px;right:3px;bottom:3px;background:#fff;border-radius:50%;transition:.3s; }
+        #syncStatusBar:hover { background:rgba(255,255,255,.05); }
+        .sync-status-synced .sync-icon { color:#27ae60; }
+        .sync-status-syncing .sync-icon { color:var(--gold); }
+        .sync-status-offline .sync-icon { color:#e74c3c; }
+        .sync-status-error .sync-icon { color:#e74c3c; }
+        #activeUsersList::-webkit-scrollbar { width:3px; }
+        #activeUsersList::-webkit-scrollbar-thumb { background:rgba(255,255,255,.15); border-radius:2px; }
         .modal {
             z-index: 10050 !important;
         }
@@ -2566,6 +2580,27 @@
 <div class="mt-3 text-center" style="font-size:.75rem;color:#6b8c72">
                 ڈیمو: admin / admin@123 یا teacher / Teacher@123
             </div>
+<div class="mt-3" style="border-top:1px solid #e5ebe7;padding-top:1rem;">
+<div style="text-align:center;font-size:.8rem;color:#888;margin-bottom:.6rem;">— ڈیٹا درآمد یا مطابقت —</div>
+<div class="d-flex gap-2" style="flex-direction:column;">
+<button class="btn-outline-green w-100 py-2 justify-content-center" onclick="loginPageSyncFromDrive()" style="font-size:.9rem;">
+<i class="fab fa-google me-1"></i> گوگل ڈرائیو سے ڈیٹا حاصل کریں
+                </button>
+<label class="btn-outline-green w-100 py-2 justify-content-center" style="font-size:.9rem;cursor:pointer;margin:0;">
+<i class="fa fa-file-import me-1"></i> فائل سے ڈیٹا درآمد کریں
+                    <input accept=".zip" onchange="loginPageImportFromFile(event)" style="display:none" type="file"/>
+</label>
+</div>
+<div id="loginPageSyncProgress" style="display:none;margin-top:.6rem;padding:.4rem .6rem;border-radius:var(--radius);background:#f8faf8;border:1px solid #e8f0ea;">
+<div style="display:flex;align-items:center;gap:.4rem;">
+<i class="fa fa-spinner fa-spin text-success" id="loginSyncIcon"></i>
+<span id="loginSyncText" style="font-size:.82rem;color:#555;">جاری ہے...</span>
+</div>
+<div style="background:#e8f0ea;border-radius:1rem;height:4px;overflow:hidden;margin-top:.3rem;">
+<div id="loginSyncBar" style="width:0%;height:100%;background:var(--green-primary);border-radius:1rem;transition:width .4s ease;"></div>
+</div>
+</div>
+</div>
 </div>
 </div>
 <div class="app-wrapper" id="appWrapper" style="display:none">
@@ -2627,6 +2662,21 @@
 <a data-page="reports" data-tooltip="رپورٹس" href="#" onclick="showPage('reports')"><i class="fa fa-chart-bar"></i> رپورٹس</a>
 <a data-page="settings" data-tooltip="ترتیبات" href="#" id="settingsNav" onclick="showPage('settings')"><i class="fa fa-cog"></i> ترتیبات</a>
 </nav>
+<div id="activeUsersSection" style="border-top:1px solid rgba(255,255,255,.08);padding:.4rem 0;">
+<div style="display:flex;align-items:center;gap:.4rem;padding:.35rem .75rem .2rem;font-size:.72rem;color:rgba(255,255,255,.45);font-family:var(--font-latin);text-transform:uppercase;letter-spacing:.05em;">
+<i class="fa fa-users" style="font-size:.65rem;"></i>
+<span>فعال صارفین</span>
+<span id="activeUsersCount" style="background:rgba(255,255,255,.1);padding:0 .35rem;border-radius:6px;font-size:.65rem;margin-right:auto;font-family:var(--font-latin)">0</span>
+</div>
+<div id="activeUsersList" style="max-height:120px;overflow-y:auto;">
+<div style="font-size:.72rem;color:rgba(255,255,255,.4);padding:.3rem .75rem">لوڈ ہو رہا ہے...</div>
+</div>
+</div>
+<div class="sync-status-synced" id="syncStatusBar" onclick="manualSync()" style="border-top:1px solid rgba(255,255,255,.08);padding:.35rem .75rem;display:flex;align-items:center;gap:.4rem;font-size:.72rem;cursor:pointer" title="مطابقت کے لیے کلک کریں">
+<i class="sync-icon fa fa-check-circle" style="font-size:.7rem;width:14px;text-align:center;"></i>
+<span class="sync-text" style="flex:1;color:rgba(255,255,255,.65);">مطابقت شدہ</span>
+<span class="sync-time" style="color:rgba(255,255,255,.35);font-family:var(--font-latin);font-size:.65rem;"></span>
+</div>
 <div class="sidebar-footer">
 <div>Created by: <strong>Yasin Ullah</strong> – Bannu Software Solutions</div>
 <div>WhatsApp: 03361593533</div>
@@ -2640,6 +2690,7 @@
 </div>
 <div class="topbar-right">
 <button class="btn-outline-green" onclick="showPage('reports')" title="رپورٹس"><i class="fa fa-chart-line"></i></button>
+<button class="btn-outline-green" id="manualSyncBtn" onclick="manualSync()" style="display:none;" title="دستی مطابقت"><i class="fa fa-sync"></i></button>
 <div class="user-badge" onclick="showPage('settings')">
 <i class="fa fa-user-circle text-success"></i>
 <span id="currentUserName">Admin</span>
@@ -3875,6 +3926,36 @@
 <div class="col-12 col-md-5">
 <div class="section-card animate__animated animate__fadeInUp">
 <div class="sc-head">
+<h4><i class="fa fa-cloud text-success me-1"></i> مطابقت کی ترتیبات</h4>
+</div>
+<div class="sc-body">
+<div class="d-flex align-items-center justify-content-between mb-2">
+<div>
+<div style="font-weight:600;font-size:.9rem;color:var(--green-dark)">خودکار مطابقت</div>
+<div style="font-size:.75rem;color:#888">ڈیٹا خودکار طور پر مطابقت ہوتا رہے گا</div>
+</div>
+<label class="switch" style="position:relative;display:inline-block;width:44px;height:24px;">
+<input checked="" id="autoSyncToggle" onchange="toggleAutoSync(this.checked)" style="opacity:0;width:0;height:0;" type="checkbox"/>
+<span id="autoSyncSlider" style="position:absolute;cursor:pointer;top:0;left:0;right:0;bottom:0;background:#ccc;border-radius:24px;transition:.3s;"></span>
+</label>
+</div>
+<div class="d-flex align-items-center justify-content-between mb-2">
+<div>
+<div style="font-weight:600;font-size:.9rem;color:var(--green-dark)">دستی مطابقت</div>
+<div style="font-size:.75rem;color:#888">ابھی ڈیٹا مطابقت کریں</div>
+</div>
+<button class="btn-primary-green btn-sm" onclick="manualSync()"><i class="fa fa-sync"></i> مطابقت کریں</button>
+</div>
+<div style="font-size:.72rem;color:#999;border-top:1px solid #e8f0ea;padding-top:.5rem;margin-top:.5rem">
+<i class="fa fa-info-circle me-1"></i> مطابقت کی حالت: <strong id="settingsSyncStatus">—</strong><br/>
+<span id="settingsSyncTime"></span>
+</div>
+</div>
+</div>
+</div>
+<div class="col-12 col-md-5">
+<div class="section-card animate__animated animate__fadeInUp">
+<div class="sc-head">
 <h4><i class="fa fa-key text-success me-1"></i> پاس ورڈ تبدیل کریں</h4>
 </div>
 <div class="sc-body">
@@ -4683,11 +4764,14 @@
 </div>
 <div class="mb-3">
 <label>کردار *</label>
-<select class="form-select" id="uRole" onchange="document.getElementById('uTeacherSelectWrap').style.display = (this.value === 'teacher') ? 'block' : 'none'">
+<select class="form-select" id="uRole" onchange="document.getElementById('uTeacherSelectWrap').style.display = (this.value === 'teacher' || this.value === 'hifzteacher') ? 'block' : 'none'">
 <option value="admin">ایڈمن (Admin)</option>
 <option value="teacher">استاد (Teacher)</option>
+<option value="hifzteacher">حفظ استاد (Hifz Teacher)</option>
 <option value="accountant">اکاؤنٹنٹ (Accountant)</option>
 <option value="librarian">لائبریرین (Librarian)</option>
+<option value="hostelwarden">ہاسٹل وارڈن (Hostel Warden)</option>
+<option value="clerk">کلرک (Clerk)</option>
 </select>
 </div>
 <div class="mb-3" id="uTeacherSelectWrap" style="display:none">
@@ -5286,19 +5370,44 @@
                     req.onerror = e => reject(e);
                 });
             }
+            function addMeta(data, isNew) {
+                const now = new Date().toISOString();
+                const uname = currentUser ? currentUser.username : 'system';
+                if (isNew) {
+                    if (!data._createdAt) {
+                        data._createdAt = now;
+                        data._createdBy = uname;
+                    }
+                }
+                data._updatedAt = now;
+                data._updatedBy = uname;
+                data._syncVersion = (data._syncVersion || 0) + 1;
+                return data;
+            }
             function dbAdd(store, data) {
+                addMeta(data, true);
                 return new Promise((resolve, reject) => {
                     const tx = db.transaction(store, 'readwrite');
                     const req = tx.objectStore(store).add(data);
-                    req.onsuccess = e => resolve(e.target.result);
+                    req.onsuccess = e => { triggerSync(); resolve(e.target.result); };
                     req.onerror = e => reject(e);
                 });
             }
-            function dbPut(store, data) {
+            async function dbPut(store, data) {
+                if (!data._createdAt && data.id) {
+                    try {
+                        const existing = await dbGet(store, data.id);
+                        if (existing) {
+                            data._createdAt = existing._createdAt;
+                            data._createdBy = existing._createdBy;
+                        }
+                    } catch (e) {}
+                }
+                addMeta(data, false);
                 return new Promise((resolve, reject) => {
                     const tx = db.transaction(store, 'readwrite');
                     const req = tx.objectStore(store).put(data);
-                    req.onsuccess = e => resolve(e.target.result);
+                    req.onsuccess = e => { triggerSync(); resolve(e.target.result); };
                     req.onerror = e => reject(e);
                 });
             }
@@ -5497,7 +5606,8 @@
                     try {
                         currentUser = JSON.parse(savedUser);
                         document.getElementById('currentUserName').textContent = currentUser.fullName;
-                        document.getElementById('currentUserRole').textContent = currentUser.role === 'admin' ? 'ایڈمن' : 'استاد';
+                        const rLabels = { admin: 'ایڈمن', teacher: 'استاد', accountant: 'اکاؤنٹنٹ', librarian: 'لائبریرین', hifzteacher: 'حفظ استاد', hostelwarden: 'ہاسٹل وارڈن', clerk: 'کلرک' };
+                        document.getElementById('currentUserRole').textContent = rLabels[currentUser.role] || currentUser.role;
                         document.getElementById('loginPage').style.display = 'none';
                         document.getElementById('appWrapper').style.display = 'flex';
                         applyRoleUI();
@@ -5505,6 +5615,11 @@
                         startIdleTimer();
                         startAbsoluteTimer();
                         showPage(getInitialPage());
+                        setTimeout(async () => {
+                            if (gdAccessToken) {
+                                try { await syncNow(); } catch (e) { console.warn('Initial sync deferred:', e); }
+                            }
+                        }, 2000);
                     } catch (e) {
                         localStorage.removeItem('loggedInUser');
                     }
@@ -5550,7 +5665,8 @@
                     currentUser = user;
                     localStorage.setItem('loggedInUser', JSON.stringify(user));
                     document.getElementById('currentUserName').textContent = user.fullName;
-                    document.getElementById('currentUserRole').textContent = user.role === 'admin' ? 'ایڈمن' : 'استاد';
+                    const loginRoleLabels = { admin: 'ایڈمن', teacher: 'استاد', accountant: 'اکاؤنٹنٹ', librarian: 'لائبریرین', hifzteacher: 'حفظ استاد', hostelwarden: 'ہاسٹل وارڈن', clerk: 'کلرک' };
+                    document.getElementById('currentUserRole').textContent = loginRoleLabels[user.role] || user.role;
                     document.getElementById('loginPage').style.display = 'none';
                     document.getElementById('appWrapper').style.display = 'flex';
                     applyRoleUI();
@@ -5559,6 +5675,12 @@
                     startAbsoluteTimer();
                     showPage(getInitialPage());
                     applyStoredTheme();
+                    // Initial sync after login
+                    setTimeout(async () => {
+                        if (gdAccessToken) {
+                            try { await syncNow(); } catch (e) { console.warn('Initial sync deferred:', e); }
+                        }
+                    }, 2000);
                 } catch (err) { showToast('error', 'خرابی پیش آئی: ' + err.message); }
                 btn.innerHTML = '<i class="fa fa-sign-in-alt"></i> داخل ہوں'; btn.disabled = false;
             }
@@ -5570,7 +5692,10 @@
                 const rolePermissions = {
                     teacher: ['dashboard', 'students', 'attendance', 'exams', 'timetable', 'certificates', 'hifz'],
                     accountant: ['dashboard', 'students', 'feecollection', 'feestructure', 'salary', 'expenses', 'fines', 'donations', 'reports'],
-                    librarian: ['dashboard', 'library', 'inventory', 'reports']
+                    librarian: ['dashboard', 'library', 'inventory', 'reports'],
+                    hifzteacher: ['dashboard', 'hifz', 'students', 'attendance', 'exams'],
+                    hostelwarden: ['dashboard', 'hostel', 'students', 'inventory'],
+                    clerk: ['dashboard', 'students', 'feecollection', 'attendance', 'salary', 'expenses', 'reports', 'certificates']
                 };
                 const allowed = rolePermissions[role] || [];
                 const allPages = ['dashboard', 'students', 'teachers', 'classes', 'feestructure', 'feecollection', 'salary', 'expenses', 'hifz', 'attendance', 'exams', 'timetable', 'staffattendance', 'inventory', 'reports', 'idcards', 'fines', 'donations', 'library', 'hostel', 'certificates', 'promotions', 'settings'];
@@ -5580,7 +5705,7 @@
                         if (link) link.style.display = 'none';
                     }
                 });
-                if (role === 'teacher') applyTeacherReadOnlyUI();
+                if (role === 'teacher' || role === 'hifzteacher') applyTeacherReadOnlyUI();
             }
             function getLastPageStorageKey() {
                 const uname = currentUser && currentUser.username ? currentUser.username : 'guest';
@@ -5593,7 +5718,10 @@
                 const rolePermissions = {
                     teacher: ['dashboard', 'students', 'attendance', 'exams', 'timetable', 'certificates', 'hifz'],
                     accountant: ['dashboard', 'students', 'feecollection', 'feestructure', 'salary', 'expenses', 'fines', 'donations', 'reports'],
-                    librarian: ['dashboard', 'library', 'inventory', 'reports']
+                    librarian: ['dashboard', 'library', 'inventory', 'reports'],
+                    hifzteacher: ['dashboard', 'hifz', 'students', 'attendance', 'exams'],
+                    hostelwarden: ['dashboard', 'hostel', 'students', 'inventory'],
+                    clerk: ['dashboard', 'students', 'feecollection', 'attendance', 'salary', 'expenses', 'reports', 'certificates']
                 };
                 const allowed = rolePermissions[currentUser.role] || [];
                 return allowed.includes(page);
@@ -5688,12 +5816,12 @@
             }
             async function populateAllSelects() {
                 let classes = await dbGetAll('classes');
-                if (currentUser && currentUser.role === 'teacher' && currentUser.teacherId) {
+                if (currentUser && (currentUser.role === 'teacher' || currentUser.role === 'hifzteacher') && currentUser.teacherId) {
                     classes = classes.filter(c => parseInt(c.teacher) === currentUser.teacherId);
                 }
                 const teachers = await dbGetAll('teachers');
                 let students = await dbGetAll('students');
-                if (currentUser && currentUser.role === 'teacher' && currentUser.teacherId) {
+                if (currentUser && (currentUser.role === 'teacher' || currentUser.role === 'hifzteacher') && currentUser.teacherId) {
                     const classIds = classes.map(c => c.id);
                     students = students.filter(s => classIds.includes(s.classId));
                 }
@@ -7409,8 +7537,8 @@
             }
             async function loadUsersTable() {
                 const users = await dbGetAll('users');
-                const roleLabels = { admin: 'ایڈمن', teacher: 'استاد', accountant: 'اکاؤنٹنٹ', librarian: 'لائبریرین' };
-                document.getElementById('usersBody').innerHTML = users.map(u => `<tr><td>${u.fullName || ''}</td><td>${u.username}</td><td><span class="badge-${u.role === 'admin' ? 'green' : 'gold'}">${roleLabels[u.role] || u.role}</span></td><td><button class="btn-danger-soft" onclick="deleteUser(${u.id})"><i class="fa fa-trash"></i></button></td></tr>`).join('');
+                const roleLabels = { admin: 'ایڈمن', teacher: 'استاد', accountant: 'اکاؤنٹنٹ', librarian: 'لائبریرین', hifzteacher: 'حفظ استاد', hostelwarden: 'ہاسٹل وارڈن', clerk: 'کلرک' };
+                document.getElementById('usersBody').innerHTML = users.map(u => `<tr><td>${u.fullName || ''}</td><td>${u.username}</td><td><span class="badge-${u.role === 'admin' ? 'green' : u.role === 'hifzteacher' || u.role === 'hostelwarden' ? 'blue' : 'gold'}">${roleLabels[u.role] || u.role}</span></td><td><button class="btn-danger-soft" onclick="deleteUser(${u.id})"><i class="fa fa-trash"></i></button></td></tr>`).join('');
             }
             async function openUserModal() {
                 document.getElementById('userId').value = '';
@@ -7423,7 +7551,7 @@
                 const username = document.getElementById('uUsername').value.trim();
                 const password = document.getElementById('uPassword').value;
                 const role = document.getElementById('uRole').value;
-                const teacherId = role === 'teacher' ? (parseInt(document.getElementById('uTeacherId').value) || null) : null;
+                const teacherId = (role === 'teacher' || role === 'hifzteacher') ? (parseInt(document.getElementById('uTeacherId').value) || null) : null;
                 if (!fullName || !username || !password) { showToast('error', 'تمام فیلڈز ضروری ہیں'); return; }
                 if (!validatePassword(password)) { showToast('error', 'پاس ورڈ کم از کم 8 حروف اور ایک خاص نشان ضروری ہے'); return; }
                 const existing = await dbGetByIndex('users', 'username', username);
@@ -8421,6 +8549,82 @@
             let tokenClient;
             let gdAccessToken = null;
             let gdBusy = false;
+
+            // ─── Multi-User Sync Engine ───
+            const SYNC_DATA_FILENAME = 'madrasa_data.json';
+            const SYNC_IMAGES_FILENAME = 'madrasa_images.json';
+            const SYNC_PRESENCE_FILENAME = 'madrasa_presence.json';
+            const SYNC_STORES = ['students', 'teachers', 'classes', 'feestructures', 'feecollections', 'salaries', 'expenses', 'attendance', 'staffattendance', 'exams', 'timetable', 'inventory', 'fines', 'donations', 'library', 'libraryIssues', 'hostel', 'hostelAllocations', 'hifzStudents', 'hifzProgress', 'hifzEvaluations', 'promotions', 'certificates', 'bookcatalog', 'gradingSchemes', 'leaveQuotas', 'settings'];
+            const IMAGE_FIELDS = ['photo', 'receiptImage', 'tPhoto', 'sPhotoBase64', 'tPhotoBase64', 'expReceiptBase64'];
+            let syncTimer = null;
+            let syncInProgress = false;
+            let lastSyncTime = null;
+            let autoSyncEnabled = true;
+            let syncStatusEl = null;
+
+            function hasImageChanges(oldData, newData) {
+                if (!oldData || !newData) return true;
+                for (const f of IMAGE_FIELDS) {
+                    if (f in oldData || f in newData) {
+                        if (oldData[f] !== newData[f]) return true;
+                    }
+                }
+                return false;
+            }
+
+            function getSyncStatusEl() {
+                if (!syncStatusEl) syncStatusEl = document.getElementById('syncStatusBar');
+                return syncStatusEl;
+            }
+
+            function updateSyncStatus(state, msg) {
+                const el = getSyncStatusEl();
+                if (!el) return;
+                el.className = 'sync-status-' + state;
+                const icon = el.querySelector('.sync-icon');
+                const text = el.querySelector('.sync-text');
+                const time = el.querySelector('.sync-time');
+                if (icon) {
+                    if (state === 'synced') icon.className = 'sync-icon fa fa-check-circle';
+                    else if (state === 'syncing') icon.className = 'sync-icon fa fa-sync-alt fa-spin';
+                    else if (state === 'offline') icon.className = 'sync-icon fa fa-exclamation-triangle';
+                    else if (state === 'error') icon.className = 'sync-icon fa fa-times-circle';
+                }
+                if (text) text.textContent = msg || (state === 'synced' ? 'مطابقت شدہ' : state === 'syncing' ? 'مطابقت ہو رہی ہے...' : state === 'offline' ? 'آف لائن' : 'غلطی');
+                if (time && state === 'synced') {
+                    const d = lastSyncTime ? new Date(lastSyncTime) : new Date();
+                    time.textContent = d.toLocaleTimeString('ur-PK', { hour: '2-digit', minute: '2-digit' });
+                    time.style.display = 'inline';
+                } else if (time) { time.style.display = 'none'; }
+                // Update settings page too
+                const ss = document.getElementById('settingsSyncStatus');
+                if (ss) {
+                    const labels = { synced: 'مطابقت شدہ ✅', syncing: 'مطابقت ہو رہی ہے... 🔄', offline: 'آف لائن 🔴', error: 'غلطی ❌' };
+                    ss.textContent = labels[state] || state;
+                }
+                const st = document.getElementById('settingsSyncTime');
+                if (st && lastSyncTime) {
+                    st.textContent = 'آخری مطابقت: ' + new Date(lastSyncTime).toLocaleString('ur-PK');
+                }
+            }
+
+            function getImageFieldNames(data) {
+                const imgs = {};
+                for (const f of IMAGE_FIELDS) {
+                    if (f in data && data[f] && typeof data[f] === 'string' && data[f].startsWith('data:')) {
+                        imgs[f] = true;
+                    }
+                }
+                return Object.keys(imgs);
+            }
+
+            function stripImagesForTextSync(data) {
+                const clean = { ...data };
+                for (const f of IMAGE_FIELDS) {
+                    if (f in clean) delete clean[f];
+                }
+                return clean;
+            }
             function gdSetProgress(show, text, pct) {
                 const wrap = document.getElementById('gdProgressWrap');
                 if (!wrap) return;
@@ -8922,6 +9126,638 @@
             });
             setTimeout(gdRestoreUIState, 1000);
             document.addEventListener('DOMContentLoaded', () => main());
+
+            // ─── Sync Engine Core ───
+
+            const SYNC_DRIVE_FILE_META = { parents: ['appDataFolder'] };
+
+            async function findDriveFile(token, filename) {
+                const q = encodeURIComponent(`name='${filename}' and 'appDataFolder' in parents and trashed=false`);
+                const res = await fetch(`https://www.googleapis.com/drive/v3/files?spaces=appDataFolder&q=${q}&fields=files(id,name,modifiedTime,size)`, {
+                    headers: { Authorization: 'Bearer ' + token }
+                });
+                if (!res.ok) return null;
+                const data = await res.json();
+                return (data.files && data.files.length > 0) ? data.files[0] : null;
+            }
+
+            async function readDriveJSON(token, filename) {
+                const file = await findDriveFile(token, filename);
+                if (!file) return null;
+                const res = await fetch(`https://www.googleapis.com/drive/v3/files/${file.id}?alt=media`, {
+                    headers: { Authorization: 'Bearer ' + token }
+                });
+                if (!res.ok) return null;
+                return { data: await res.json(), meta: file };
+            }
+
+            async function writeDriveJSON(token, filename, jsonData) {
+                const file = await findDriveFile(token, filename);
+                const blob = new Blob([JSON.stringify(jsonData)], { type: 'application/json' });
+                let uploadUrl, method;
+                if (file) {
+                    uploadUrl = `https://www.googleapis.com/upload/drive/v3/files/${file.id}?uploadType=media`;
+                    method = 'PATCH';
+                } else {
+                    uploadUrl = 'https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart&fields=id,name,modifiedTime,size';
+                    method = 'POST';
+                }
+                if (method === 'POST') {
+                    const form = new FormData();
+                    form.append('metadata', new Blob([JSON.stringify({ name: filename, parents: ['appDataFolder'] })], { type: 'application/json' }));
+                    form.append('file', blob, filename);
+                    const res = await fetch(uploadUrl, { method, headers: { Authorization: 'Bearer ' + token }, body: form });
+                    return res.ok;
+                } else {
+                    const res = await fetch(uploadUrl, { method, headers: { Authorization: 'Bearer ' + token, 'Content-Type': 'application/json' }, body: blob });
+                    return res.ok;
+                }
+            }
+
+            function getChangedStores(localData, driveData) {
+                const changed = [];
+                for (const store of SYNC_STORES) {
+                    const local = localData[store] || [];
+                    const drive = driveData[store] || [];
+                    const localMap = {};
+                    local.forEach(r => { if (r.id) localMap[r.id] = r; });
+                    const driveMap = {};
+                    drive.forEach(r => { if (r.id) driveMap[r.id] = r; });
+                    let hasDiff = local.length !== drive.length;
+                    if (!hasDiff) {
+                        for (const id in localMap) {
+                            const lr = localMap[id];
+                            const dr = driveMap[id];
+                            if (!dr) { hasDiff = true; break; }
+                            if ((lr._updatedAt || '') !== (dr._updatedAt || '')) { hasDiff = true; break; }
+                        }
+                    }
+                    if (!hasDiff) {
+                        for (const id in driveMap) {
+                            if (!localMap[id]) { hasDiff = true; break; }
+                        }
+                    }
+                    if (hasDiff) changed.push(store);
+                }
+                return changed;
+            }
+
+            function mergeRecords(localRecords, driveRecords) {
+                const merged = [];
+                const seen = {};
+                const localMap = {};
+                localRecords.forEach(r => { if (r.id) { localMap[r.id] = r; seen[r.id] = true; } });
+                driveRecords.forEach(r => {
+                    if (!r.id) return;
+                    seen[r.id] = true;
+                    const local = localMap[r.id];
+                    if (!local) {
+                        merged.push(r);
+                    } else {
+                        const lTime = local._updatedAt || '';
+                        const dTime = r._updatedAt || '';
+                        if (dTime >= lTime) {
+                            merged.push(r);
+                        } else {
+                            merged.push(local);
+                        }
+                    }
+                });
+                for (const id in localMap) {
+                    if (!seen[id]) merged.push(localMap[id]);
+                }
+                merged.sort((a, b) => (a.id || 0) - (b.id || 0));
+                return merged;
+            }
+
+            async function pushToDrive(token) {
+                const payload = {};
+                const remote = await readDriveJSON(token, SYNC_DATA_FILENAME);
+                const driveData = remote ? remote.data : {};
+                const deletedIds = {};
+                for (const store of SYNC_STORES) {
+                    const localRecords = await dbGetAll(store);
+                    payload[store] = localRecords;
+                    // Detect deleted records (exist in Drive but not locally)
+                    const driveRecords = driveData[store] || [];
+                    const localIds = new Set(localRecords.map(r => r.id));
+                    const del = driveRecords.filter(r => r.id && !localIds.has(r.id)).map(r => r.id);
+                    if (del.length > 0) deletedIds[store] = del;
+                }
+                if (Object.keys(deletedIds).length > 0) payload._deletedIds = deletedIds;
+                payload._syncMeta = {
+                    lastPushed: new Date().toISOString(),
+                    pushedBy: currentUser ? currentUser.username : 'system',
+                    version: 2
+                };
+                const ok = await writeDriveJSON(token, SYNC_DATA_FILENAME, payload);
+                if (ok) {
+                    // Check if any images changed
+                    let hasImgChanges = false;
+                    for (const store of SYNC_STORES) {
+                        const records = payload[store] || [];
+                        for (const r of records) {
+                            for (const f of IMAGE_FIELDS) {
+                                if (f in r && r[f] && typeof r[f] === 'string' && r[f].startsWith('data:')) {
+                                    hasImgChanges = true;
+                                    break; }
+                            }
+                            if (hasImgChanges) break;
+                        }
+                        if (hasImgChanges) break;
+                    }
+                    if (hasImgChanges) {
+                        const imgPayload = {};
+                        for (const store of SYNC_STORES) {
+                            const records = payload[store] || [];
+                            const withImgs = records.filter(r => IMAGE_FIELDS.some(f => f in r && r[f] && r[f].startsWith('data:')));
+                            if (withImgs.length > 0) {
+                                imgPayload[store] = withImgs.map(r => {
+                                    const imgRec = { id: r.id, _images: {} };
+                                    for (const f of IMAGE_FIELDS) {
+                                        if (f in r && r[f] && r[f].startsWith('data:')) imgRec._images[f] = r[f];
+                                    }
+                                    return imgRec;
+                                });
+                            }
+                        }
+                        if (Object.keys(imgPayload).length > 0) {
+                            imgPayload._syncMeta = { lastPushed: new Date().toISOString(), pushedBy: currentUser ? currentUser.username : 'system', type: 'images' };
+                            await writeDriveJSON(token, SYNC_IMAGES_FILENAME, imgPayload);
+                        }
+                    }
+                }
+                return ok;
+            }
+
+            async function pullFromDrive(token) {
+                const remote = await readDriveJSON(token, SYNC_DATA_FILENAME);
+                if (!remote) return { merged: false, reason: 'no_remote' };
+                const driveData = remote.data;
+                let mergedAny = false;
+                const deletedIdsFromDrive = driveData._deletedIds || {};
+                for (const store of SYNC_STORES) {
+                    const driveRecords = driveData[store] || [];
+                    const localRecords = await dbGetAll(store);
+                    const merged = mergeRecords(localRecords, driveRecords);
+                    const localIds = new Set(localRecords.map(r => r.id));
+                    const mergedIds = new Set(merged.map(r => r.id));
+                    // Apply remote deletions first
+                    const storeDeletions = deletedIdsFromDrive[store] || [];
+                    if (storeDeletions.length > 0) {
+                        for (const delId of storeDeletions) {
+                            const localRec = localRecords.find(l => l.id === delId);
+                            if (localRec) { await dbDelete(store, delId); mergedAny = true; }
+                        }
+                    }
+                    if (localRecords.length !== merged.length) { mergedAny = true; }
+                    else {
+                        for (const r of merged) {
+                            const local = localRecords.find(l => l.id === r.id);
+                            if (!local || local._updatedAt !== r._updatedAt) { mergedAny = true; break; }
+                        }
+                    }
+                    if (mergedAny) {
+                        for (const mr of merged) {
+                            if (!localIds.has(mr.id)) {
+                                const clean = { ...mr }; delete clean.id;
+                                const preserveTimes = { _createdAt: mr._createdAt, _createdBy: mr._createdBy, _updatedAt: mr._updatedAt, _updatedBy: mr._updatedBy, _syncVersion: mr._syncVersion || 1 };
+                                await dbAdd(store, clean);
+                                // Restore original timestamps from Drive
+                                if (clean.id) {
+                                    const updated = await dbGet(store, clean.id);
+                                    if (updated) {
+                                        Object.assign(updated, preserveTimes);
+                                        const tx = db.transaction(store, 'readwrite');
+                                        tx.objectStore(store).put(updated);
+                                        await new Promise(r => { tx.oncomplete = r; });
+                                    }
+                                }
+                            } else {
+                                const local = localRecords.find(l => l.id === mr.id);
+                                if (local && local._updatedAt !== mr._updatedAt) {
+                                    const preserve = { _createdAt: mr._createdAt, _createdBy: mr._createdBy, _updatedAt: mr._updatedAt, _updatedBy: mr._updatedBy, _syncVersion: mr._syncVersion || local._syncVersion || 1 };
+                                    await dbPut(store, mr);
+                                    // Restore timestamps from Drive
+                                    const updated = await dbGet(store, mr.id);
+                                    if (updated) {
+                                        Object.assign(updated, preserve);
+                                        const tx = db.transaction(store, 'readwrite');
+                                        tx.objectStore(store).put(updated);
+                                        await new Promise(r => { tx.oncomplete = r; });
+                                    }
+                                }
+                            }
+                        }
+                        // Handle deletions: records in local but not in merged (deleted by another user)
+                        const mergedIdSet = new Set(merged.map(r => r.id));
+                        for (const lr of localRecords) {
+                            if (!mergedIdSet.has(lr.id)) {
+                                await dbDelete(store, lr.id);
+                            }
+                        }
+                    }
+                }
+                // Pull images
+                const remoteImgs = await readDriveJSON(token, SYNC_IMAGES_FILENAME);
+                if (remoteImgs) {
+                    const imgData = remoteImgs.data;
+                    for (const store of SYNC_STORES) {
+                        const imgRecords = imgData[store] || [];
+                        for (const ir of imgRecords) {
+                            if (ir._images) {
+                                const localRec = await dbGet(store, ir.id);
+                                if (localRec) {
+                                    let needsUpdate = false;
+                                    for (const [field, val] of Object.entries(ir._images)) {
+                                        if (localRec[field] !== val) { localRec[field] = val; needsUpdate = true; }
+                                    }
+                                    if (needsUpdate) await dbPut(store, localRec);
+                                }
+                            }
+                        }
+                    }
+                }
+                return { merged: mergedAny, reason: mergedAny ? 'merged' : 'up_to_date' };
+            }
+
+            async function syncNow() {
+                if (!autoSyncEnabled) return { synced: false, reason: 'auto_sync_disabled' };
+                if (!navigator.onLine) { updateSyncStatus('offline', 'آف لائن'); return { synced: false, reason: 'offline' }; }
+                if (syncInProgress) return { synced: false, reason: 'in_progress' };
+                if (!gdAccessToken) {
+                    try {
+                        if (!initGoogleAuth()) return { synced: false, reason: 'no_auth' };
+                        await gdRequestToken();
+                    } catch (e) { return { synced: false, reason: 'auth_failed' }; }
+                }
+                syncInProgress = true;
+                updateSyncStatus('syncing', 'مطابقت ہو رہی ہے...');
+                try {
+                    const token = gdAccessToken;
+                    const pullResult = await pullFromDrive(token);
+                    const pushOk = await pushToDrive(token);
+                    if (pushOk) {
+                        lastSyncTime = Date.now();
+                        updateSyncStatus('synced', 'مطابقت شدہ');
+                    } else {
+                        updateSyncStatus('error', 'مطابقت ناکام');
+                    }
+                    if (pullResult.merged) {
+                        await populateAllSelects();
+                        const currentPage = document.querySelector('.page-view.active');
+                        if (currentPage) {
+                            const pageId = currentPage.id.replace('page-', '');
+                            const loaders = {
+                                'students': 'loadStudentsTable', 'teachers': 'loadTeachersTable',
+                                'classes': 'loadClassesTable', 'feestructure': 'loadFeeStructTable',
+                                'feecollection': 'loadFeeCollTable', 'salary': 'loadSalaryTable',
+                                'expenses': 'loadExpensesTable', 'attendance': 'loadAttendance',
+                                'staffattendance': 'loadStaffAtt', 'exams': 'loadExamsTable',
+                                'inventory': 'loadInventoryTable', 'donations': 'loadDonationsTable',
+                                'library': 'loadLibraryTable', 'hostel': 'loadHostelTable',
+                                'fines': 'loadFinesTable', 'hifz': 'loadHifzStudentsTable',
+                                'settings': 'loadUsersTable'
+                            };
+                            const fn = loaders[pageId];
+                            if (fn && typeof window[fn] === 'function') {
+                                try { await window[fn](); } catch (e) { }
+                            }
+                        }
+                        showToast('success', 'دوسرے صارف کی تبدیلیاں مطابقت ہو گئیں');
+                    }
+                    syncInProgress = false;
+                    return { synced: true, merged: pullResult.merged };
+                } catch (err) {
+                    syncInProgress = false;
+                    updateSyncStatus('error', 'مطابقت میں خرابی');
+                    console.error('Sync error:', err);
+                    return { synced: false, reason: err.message };
+                }
+            }
+
+            function debounceSync() {
+                if (!autoSyncEnabled) return;
+                clearTimeout(syncTimer);
+                syncTimer = setTimeout(() => {
+                    syncNow();
+                }, 2000);
+            }
+
+            let userActivityTimer = null;
+            function triggerSync() {
+                if (!autoSyncEnabled) return;
+                clearTimeout(syncTimer);
+                syncTimer = setTimeout(() => {
+                    syncNow();
+                }, 3000);
+                // Also sync after 5 seconds of inactivity
+                clearTimeout(userActivityTimer);
+                userActivityTimer = setTimeout(() => {
+                    syncNow();
+                }, 5000);
+            }
+
+            async function manualSync() {
+                if (!navigator.onLine) { showToast('error', 'آپ آف لائن ہیں'); return; }
+                const btn = document.querySelector('[onclick="manualSync()"]');
+                if (btn) { btn.disabled = true; btn.innerHTML = '<i class="fa fa-sync fa-spin"></i> مطابقت...'; }
+                try {
+                    if (!gdAccessToken) {
+                        if (!initGoogleAuth()) { showToast('error', 'Google Auth init failed'); if (btn) { btn.disabled = false; btn.innerHTML = '<i class="fa fa-sync"></i> دستی مطابقت'; } return; }
+                        await gdRequestToken();
+                    }
+                    const result = await syncNow();
+                    if (result.synced) {
+                        showToast('success', result.merged ? 'مطابقت کامیاب! نئے ڈیٹا ضم ہو گئے' : 'مطابقت کامیاب! ڈیٹا تازہ ترین ہے');
+                    } else {
+                        showToast('warning', 'مطابقت نہیں ہو سکی: ' + (result.reason || 'unknown'));
+                    }
+                } catch (err) {
+                    showToast('error', 'مطابقت ناکام: ' + err.message);
+                }
+                if (btn) { btn.disabled = false; btn.innerHTML = '<i class="fa fa-sync"></i> دستی مطابقت'; }
+            }
+
+            function toggleAutoSync(enabled) {
+                autoSyncEnabled = enabled;
+                localStorage.setItem('autoSyncEnabled', enabled ? '1' : '0');
+                const btn = document.getElementById('manualSyncBtn');
+                if (btn) btn.style.display = enabled ? 'none' : 'inline-flex';
+                if (enabled) {
+                    triggerSync();
+                    updateSyncStatus('synced', 'خودکار مطابقت فعال');
+                } else {
+                    clearTimeout(syncTimer);
+                    updateSyncStatus('synced', 'خودکار مطابقت غیر فعال');
+                }
+                showToast('info', enabled ? 'خودکار مطابقت فعال' : 'خودکار مطابقت غیر فعال');
+            }
+
+            // ─── Presence System ───
+            let presenceInterval = null;
+            let currentPageForPresence = 'dashboard';
+
+            async function updatePresence() {
+                if (!gdAccessToken || !currentUser) return;
+                try {
+                    const existing = await readDriveJSON(gdAccessToken, SYNC_PRESENCE_FILENAME);
+                    let presence = existing && existing.data ? existing.data : { users: {} };
+                    const now = Date.now();
+                    presence.users[currentUser.username] = {
+                        fullName: currentUser.fullName,
+                        role: currentUser.role,
+                        page: currentPageForPresence,
+                        lastSeen: now,
+                        sessionStart: presence.users[currentUser.username]?.sessionStart || now
+                    };
+                    // Clean stale users (no heartbeat for 120s)
+                    const staleCutoff = now - 120000;
+                    for (const uname in presence.users) {
+                        if (presence.users[uname].lastSeen < staleCutoff) {
+                            delete presence.users[uname];
+                        }
+                    }
+                    presence._syncMeta = { lastUpdated: new Date().toISOString() };
+                    await writeDriveJSON(gdAccessToken, SYNC_PRESENCE_FILENAME, presence);
+                } catch (e) { /* silent */ }
+            }
+
+            function startPresenceTracking() {
+                if (presenceInterval) clearInterval(presenceInterval);
+                updatePresence();
+                presenceInterval = setInterval(updatePresence, 30000);
+            }
+
+            function stopPresenceTracking() {
+                if (presenceInterval) { clearInterval(presenceInterval); presenceInterval = null; }
+                // Mark offline in presence file
+                if (gdAccessToken && currentUser) {
+                    readDriveJSON(gdAccessToken, SYNC_PRESENCE_FILENAME).then(existing => {
+                        if (existing && existing.data && existing.data.users) {
+                            delete existing.data.users[currentUser.username];
+                            writeDriveJSON(gdAccessToken, SYNC_PRESENCE_FILENAME, existing.data);
+                        }
+                    }).catch(() => {});
+                }
+            }
+
+            async function refreshActiveUsers() {
+                const container = document.getElementById('activeUsersList');
+                if (!container) return;
+                const cntEl = document.getElementById('activeUsersCount');
+                if (!gdAccessToken) { container.innerHTML = '<div style="font-size:.72rem;color:rgba(255,255,255,.4);padding:.5rem">مطابقت کے لیے گوگل سے رابطہ کریں</div>'; if (cntEl) cntEl.textContent = '0'; return; }
+                try {
+                    const existing = await readDriveJSON(gdAccessToken, SYNC_PRESENCE_FILENAME);
+                    if (!existing || !existing.data || !existing.data.users) {
+                        container.innerHTML = '<div style="font-size:.72rem;color:rgba(255,255,255,.4);padding:.5rem">کوئی دوسرا صارف فعال نہیں</div>';
+                        if (cntEl) cntEl.textContent = '0';
+                        return;
+                    }
+                    const now = Date.now();
+                    const cutoff = now - 120000;
+                    const users = existing.data.users;
+                    const activeUsers = Object.entries(users).filter(([_, u]) => u.lastSeen > cutoff);
+                    const countEl = document.getElementById('activeUsersCount');
+                    if (countEl) countEl.textContent = activeUsers.length;
+                    if (activeUsers.length === 0) {
+                        container.innerHTML = '<div style="font-size:.72rem;color:rgba(255,255,255,.4);padding:.5rem">کوئی دوسرا صارف فعال نہیں</div>';
+                        if (countEl) countEl.textContent = '0';
+                        return;
+                    }
+                    const roleLabels = { admin: 'ایڈمن', teacher: 'استاد', accountant: 'اکاؤنٹنٹ', librarian: 'لائبریرین', hifzteacher: 'حفظ استاد', hostelwarden: 'ہاسٹل وارڈن', clerk: 'کلرک' };
+                    const pageLabels = { dashboard: 'ڈیش بورڈ', students: 'طلبا', teachers: 'اساتذہ', classes: 'جماعتیں', feestructure: 'فیس ڈھانچہ', feecollection: 'فیس وصولی', expenses: 'اخراجات', salary: 'تنخواہ', attendance: 'حاضری', exams: 'امتحان', timetable: 'ٹائم ٹیبل', hifz: 'حفظ', library: 'کتب خانہ', hostel: 'دارالاقامہ', inventory: 'انوینٹری', donations: 'عطیات', fines: 'جرمانے', reports: 'رپورٹس', settings: 'ترتیبات', certificates: 'اسناد', promotions: 'ترقی', staffattendance: 'عملہ حاضری', idcards: 'شناختی کارڈ' };
+                    container.innerHTML = activeUsers.map(([uname, u]) => {
+                        const isMe = currentUser && currentUser.username === uname;
+                        const age = now - u.lastSeen;
+                        const color = age < 60000 ? '#27ae60' : '#f39c12';
+                        return `<div style="display:flex;align-items:center;gap:.5rem;padding:.3rem .5rem;border-radius:6px;background:${isMe ? 'rgba(201,162,39,.15)' : 'transparent'};font-size:.78rem;color:rgba(255,255,255,.85);">
+                            <span style="width:8px;height:8px;border-radius:50%;background:${color};flex-shrink:0;"></span>
+                            <span style="flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${isMe ? 'میں' : u.fullName || uname}</span>
+                            <span style="font-size:.65rem;color:rgba(255,255,255,.5);font-family:var(--font-latin)">${roleLabels[u.role] || u.role}</span>
+                            <span style="font-size:.6rem;color:rgba(255,255,255,.35);font-family:var(--font-latin)">${pageLabels[u.page] || u.page}</span>
+                        </div>`;
+                    }).join('');
+                } catch (e) {
+                    container.innerHTML = '<div style="font-size:.72rem;color:rgba(255,255,255,.4);padding:.5rem">فعال صارفین لوڈ نہیں ہو سکے</div>';
+                    if (cntEl) cntEl.textContent = '0';
+                }
+            }
+
+            function startActiveUsersPolling() {
+                setInterval(refreshActiveUsers, 15000);
+                setTimeout(refreshActiveUsers, 2000);
+            }
+
+            // Patch showPage to update presence
+            const _origShowPage = window.showPage;
+            if (_origShowPage) {
+                window.showPage = function(page) {
+                    currentPageForPresence = page;
+                    _origShowPage(page);
+                    if (gdAccessToken && currentUser) {
+                        clearTimeout(window._presenceUpdateTimer);
+                        window._presenceUpdateTimer = setTimeout(updatePresence, 500);
+                    }
+                };
+            }
+
+            // Override doLogout to clean up presence
+            const _origDoLogout = window.doLogout;
+            if (_origDoLogout) {
+                window.doLogout = function() {
+                    stopPresenceTracking();
+                    clearTimeout(syncTimer);
+                    if (_origDoLogout) _origDoLogout();
+                };
+            }
+
+            // ─── Login Page Pre-Auth Sync/Import ───
+            function loginPageShowProgress(show, msg, pct) {
+                const wrap = document.getElementById('loginPageSyncProgress');
+                if (!wrap) return;
+                wrap.style.display = show ? 'block' : 'none';
+                if (msg) document.getElementById('loginSyncText').textContent = msg;
+                if (typeof pct === 'number') document.getElementById('loginSyncBar').style.width = pct + '%';
+                const icon = document.getElementById('loginSyncIcon');
+                if (icon) icon.className = show && msg && msg.includes('کامیاب') ? 'fa fa-check-circle text-success' : show ? 'fa fa-spinner fa-spin text-success' : 'fa fa-spinner';
+            }
+            async function loginPageImportAllStores(data) {
+                for (const store of STORES) {
+                    if (data[store]) {
+                        await dbClear(store);
+                        for (const record of data[store]) {
+                            const rec = { ...record };
+                            delete rec.id;
+                            await dbAdd(store, rec);
+                        }
+                    }
+                }
+            }
+            async function loginPageSyncFromDrive() {
+                if (!navigator.onLine) { Swal.fire({ icon: 'error', title: 'آف لائن', text: 'آپ آف لائن ہیں۔ انٹرنیٹ کنیکشن درکار ہے۔' }); return; }
+                loginPageShowProgress(true, 'گوگل سے رابطہ قائم ہو رہا ہے...', 10);
+                try {
+                    if (!initGoogleAuth()) { loginPageShowProgress(false); return; }
+                    const token = await (async () => {
+                        return new Promise((resolve, reject) => {
+                            if (gdAccessToken) { resolve(gdAccessToken); return; }
+                            const tc = google.accounts.oauth2.initTokenClient({
+                                client_id: CLIENT_ID,
+                                scope: SCOPES,
+                                callback: (resp) => {
+                                    if (resp.error) { reject(new Error(resp.error)); return; }
+                                    gdAccessToken = resp.access_token;
+                                    resolve(gdAccessToken);
+                                }
+                            });
+                            tc.requestAccessToken({ prompt: 'consent' });
+                        });
+                    })();
+                    loginPageShowProgress(true, 'Drive سے ڈیٹا ڈاؤن لوڈ ہو رہا ہے...', 40);
+                    const remote = await readDriveJSON(token, SYNC_DATA_FILENAME);
+                    if (!remote) {
+                        loginPageShowProgress(false);
+                        Swal.fire({ icon: 'warning', title: 'کوئی ڈیٹا نہیں', text: 'گوگل ڈرائیو پر اس ایپ کا کوئی ڈیٹا نہیں ملا۔ پہلے ایڈمن سے ڈیٹا Drive پر محفوظ کروائیں۔' });
+                        return;
+                    }
+                    loginPageShowProgress(true, 'ڈیٹا درآمد ہو رہا ہے...', 70);
+                    await loginPageImportAllStores(remote.data);
+                    // Also get images if available
+                    const remoteImgs = await readDriveJSON(token, SYNC_IMAGES_FILENAME);
+                    if (remoteImgs) {
+                        for (const store of SYNC_STORES) {
+                            const imgRecords = remoteImgs.data[store] || [];
+                            for (const ir of imgRecords) {
+                                if (ir._images) {
+                                    const all = await dbGetAll(store);
+                                    const rec = all.find(r => r.id === ir.id);
+                                    if (rec) {
+                                        let changed = false;
+                                        for (const [f, v] of Object.entries(ir._images)) {
+                                            if (rec[f] !== v) { rec[f] = v; changed = true; }
+                                        }
+                                        if (changed) { const c = { ...rec }; delete c.id; await dbAdd(store, c); }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                    loginPageShowProgress(true, 'کامیاب! ڈیٹا لوڈ ہو رہا ہے...', 100);
+                    localStorage.setItem('gdEmail', token.email || '');
+                    gdUpdateConnectionUI(true, token.email || '');
+                    setTimeout(() => {
+                        loginPageShowProgress(false);
+                        Swal.fire({ icon: 'success', title: 'ڈیٹا کامیابی سے حاصل ہو گیا', text: 'اب آپ اپنے صارف نام اور پاس ورڈ سے لاگ ان کر سکتے ہیں', confirmButtonColor: '#1a6b3c' }).then(() => {
+                            location.reload();
+                        });
+                    }, 600);
+                } catch (err) {
+                    loginPageShowProgress(false);
+                    Swal.fire({ icon: 'error', title: 'خرابی', text: 'ڈیٹا حاصل کرنے میں ناکامی: ' + (err.message || 'نامعلوم') });
+                }
+            }
+            async function loginPageImportFromFile(event) {
+                const file = event.target.files[0];
+                if (!file) return;
+                Swal.fire({ title: 'فائل سے ڈیٹا درآمد کریں؟', text: 'موجودہ تمام ڈیفالٹ ڈیٹا تبدیل ہو جائے گا اور آپ درآمد شدہ صارفین سے لاگ ان کر سکیں گے', icon: 'warning', showCancelButton: true, confirmButtonText: 'ہاں، درآمد کریں', cancelButtonText: 'منسوخ', confirmButtonColor: '#1a6b3c' }).then(async r => {
+                    if (!r.isConfirmed) { event.target.value = ''; return; }
+                    loginPageShowProgress(true, 'ZIP فائل پڑھی جا رہی ہے...', 20);
+                    try {
+                        const zip = await JSZip.loadAsync(file);
+                        const jsonFile = zip.file("madrasa_database.json");
+                        if (!jsonFile) throw new Error("ZIP میں madrasa_database.json نہیں ملا");
+                        loginPageShowProgress(true, 'ڈیٹا نکالا جا رہا ہے...', 50);
+                        const text = await jsonFile.async("string");
+                        const data = JSON.parse(text);
+                        loginPageShowProgress(true, 'ڈیٹا بیس میں درآمد ہو رہا ہے...', 70);
+                        await loginPageImportAllStores(data);
+                        loginPageShowProgress(true, 'کامیاب!', 100);
+                        setTimeout(() => {
+                            loginPageShowProgress(false);
+                            Swal.fire({ icon: 'success', title: 'ڈیٹا کامیابی سے درآمد ہو گیا', text: 'اب آپ اپنے صارف نام اور پاس ورڈ سے لاگ ان کر سکتے ہیں', confirmButtonColor: '#1a6b3c' }).then(() => {
+                                location.reload();
+                            });
+                        }, 600);
+                    } catch (err) {
+                        loginPageShowProgress(false);
+                        Swal.fire({ icon: 'error', title: 'خرابی', text: 'فائل درست نہیں: ' + err.message });
+                    }
+                    event.target.value = '';
+                });
+            }
+
+            // Load autoSync setting
+            (function initSyncSettings() {
+                try {
+                    const saved = localStorage.getItem('autoSyncEnabled');
+                    if (saved === '0') {
+                        autoSyncEnabled = false;
+                        const cb = document.getElementById('autoSyncToggle');
+                        if (cb) cb.checked = false;
+                        const btn = document.getElementById('manualSyncBtn');
+                        if (btn) btn.style.display = 'inline-flex';
+                    } else {
+                        const btn = document.getElementById('manualSyncBtn');
+                        if (btn) btn.style.display = 'none';
+                    }
+                } catch (e) {}
+            })();
+
+            // Start presence after login
+            document.addEventListener('DOMContentLoaded', () => {
+                // Defer start until after login
+                const checkInterval = setInterval(() => {
+                    if (currentUser && gdAccessToken) {
+                        clearInterval(checkInterval);
+                        setTimeout(() => {
+                            startPresenceTracking();
+                            startActiveUsersPolling();
+                        }, 3000);
+                    }
+                }, 500);
+                setTimeout(() => clearInterval(checkInterval), 30000);
+            });
         </script>
 <script src="./hifz.js"></script>
 <script src="./hifz2.js"></script>
