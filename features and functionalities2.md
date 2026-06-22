@@ -62,4 +62,50 @@
 
 ---
 
+---
+
+## 🆕 Recently Added Features
+
+### 📥 Pre-Login Data Management
+- **Google Drive Restore**: Download backup from Drive before logging in
+- **File Import**: Upload ZIP export before logging in
+- **Sync Before Login**: Fetch latest Drive backup then log in
+
+### 🧾 Quick Receipt Generator
+- Walk‑in payment receipt (non‑student)
+- Fields: name, purpose, amount, date, receipt number
+- Instant print
+
+### 👥 Active Users Display
+- Sidebar footer shows currently logged‑in users
+- Multi‑tab support (same browser)
+
+### 🔄 Sync Status Bar
+- Shows data sync status at bottom of sidebar
+- Click to trigger manual sync
+
+### 📚 Library Enhanced
+- **Books Catalog**: separate table for books (name, author, total, available)
+- **Issue/Return**: separate table for transactions
+- Auto stock update from inventory
+
+### 🛏️ Hostel Enhanced
+- **Rooms Catalog**: separate table for rooms (room number, capacity)
+- Capacity validation (max per room configurable)
+- **Residents**: separate table for allocations
+
+### 🏅 Donors Management
+- Separate donors catalog (name, contact)
+- Donation history per donor
+
+### 📚 Academic Year Management
+- Create/manage academic years
+- End‑of‑year promotion wizard
+- Archive records
+
+### 🆔 Combined Documents Page
+- Unified page for: Student ID, Teacher ID, Leaving Certificate, Sanad/Completion, Character Certificate
+
+---
+
 > ℹ️ *This report reflects all features, modules, and functionalities implemented in the Madrasa Management System as of the current version. The system is a fully client‑side PWA using IndexedDB, requiring no backend server, and works offline. All features are production‑ready and tested.* ✅

@@ -62,19 +62,19 @@ if (workbox) {
     },
     {
         "url": "client readme Guide D.md",
-        "revision": "96f7c54b97e5a4accbec951c275ba392"
+        "revision": "084d6a1ffad212dc6f5785ee94d1ed80"
     },
     {
         "url": "client readme Guide Q.md",
-        "revision": "de3484224348da2e2436daddb82b8296"
+        "revision": "e1277c0e6908e21ef2105c162efde519"
     },
     {
         "url": "features and functionalities.md",
-        "revision": "ad7f8b837ae43ed75c6a4de23ee83b7c"
+        "revision": "bb21c23ea0fad0a9a8479c74f75f617d"
     },
     {
         "url": "features and functionalities2.md",
-        "revision": "3cb9ef8a58e89060a37190b57da19c00"
+        "revision": "6afcd2434c5399faaf67ddb8831e946c"
     },
     {
         "url": "hifz.js",
@@ -94,7 +94,7 @@ if (workbox) {
     },
     {
         "url": "index.html",
-        "revision": "92c6aa36b55fe807a564696216ef8547"
+        "revision": "53f5c1316f236813877ffe3053f9fc9c"
     },
     {
         "url": "index2_enhanced_full.html",
@@ -122,15 +122,19 @@ if (workbox) {
     },
     {
         "url": "readme.md",
-        "revision": "0f287a209ca30758f00afb386eadf286"
+        "revision": "6b31ca5f299244fecb857e6adb1f81d1"
     },
     {
         "url": "readmeD.md",
-        "revision": "3e1692122e3b43cc771541487c0f5b18"
+        "revision": "74a41ee9de14f7b37f3a2ffe0ca7db35"
     },
     {
         "url": "sw.js",
-        "revision": "6b8fb34d74138ce7701c08276ed741bf"
+        "revision": "728e5b3961e8a98598c9b27ed751d7db"
+    },
+    {
+        "url": "userguide.md",
+        "revision": "fc9611b9c49f0b137554e13dabf40bc5"
     }
 ]);
 

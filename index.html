@@ -663,6 +663,70 @@
         #loginPage .login-box { margin: 0 auto; }
         .animate__animated { animation-duration: 0.01s !important; animation-fill-mode: none !important; }
 
+        .app-overlay-loader {
+            position: fixed;
+            inset: 0;
+            z-index: 99999;
+            background: rgba(0,0,0,.45);
+            backdrop-filter: blur(3px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity .25s ease
+        }
+        .app-overlay-loader.active {
+            opacity: 1;
+            pointer-events: auto
+        }
+        .app-overlay-loader .loader-card {
+            background: #fff;
+            border-radius: 1rem;
+            padding: 2rem 2.5rem;
+            width: 360px;
+            max-width: 90vw;
+            box-shadow: 0 20px 60px rgba(0,0,0,.2);
+            text-align: center;
+            direction: rtl
+        }
+        .app-overlay-loader .loader-card .loader-icon {
+            font-size: 2.5rem;
+            color: var(--green-primary);
+            margin-bottom: .75rem
+        }
+        .app-overlay-loader .loader-card .loader-title {
+            font-size: 1rem;
+            color: #1a2e22;
+            margin-bottom: .3rem;
+            font-weight: 600
+        }
+        .app-overlay-loader .loader-card .loader-text {
+            font-size: .82rem;
+            color: #666;
+            margin-bottom: 1rem;
+            min-height: 1.2em
+        }
+        .app-overlay-loader .loader-card .loader-progress-track {
+            background: #e8f0ea;
+            border-radius: 2rem;
+            height: 6px;
+            overflow: hidden
+        }
+        .app-overlay-loader .loader-card .loader-progress-bar {
+            width: 0%;
+            height: 100%;
+            background: linear-gradient(90deg, var(--green-primary), var(--gold));
+            border-radius: 2rem;
+            transition: width .35s ease
+        }
+        .app-overlay-loader .loader-card .loader-percent {
+            font-size: .72rem;
+            color: #999;
+            margin-top: .4rem;
+            font-family: var(--font-latin)
+        }
+
         .login-box {
             background: #fff;
             border-radius: 1rem;
@@ -2583,10 +2647,13 @@
 <div class="mt-3" style="border-top:1px solid #e5ebe7;padding-top:1rem;">
 <div style="text-align:center;font-size:.8rem;color:#888;margin-bottom:.6rem;">— ڈیٹا درآمد یا مطابقت —</div>
 <div class="d-flex gap-2" style="flex-direction:column;">
-<button class="btn-outline-green w-100 py-2 justify-content-center" onclick="loginPageSyncFromDrive()" style="font-size:.9rem;">
+<button class="btn-outline-green w-100 py-2 justify-content-center" id="loginDriveBtn" onclick="loginPageSyncFromDrive()" style="font-size:.9rem;">
 <i class="fab fa-google me-1"></i> گوگل ڈرائیو سے ڈیٹا حاصل کریں
                 </button>
-<label class="btn-outline-green w-100 py-2 justify-content-center" style="font-size:.9rem;cursor:pointer;margin:0;">
+<button class="btn-outline-green w-100 py-2 justify-content-center" id="loginSyncBtn" onclick="loginPageSyncBeforeLogin()" style="display:none;font-size:.9rem;">
+<i class="fa fa-sync-alt me-1"></i> لاگ ان سے پہلے مطابقت کریں
+                </button>
+<label class="btn-outline-green w-100 py-2 justify-content-center" id="loginImportLabel" style="font-size:.9rem;cursor:pointer;margin:0;">
 <i class="fa fa-file-import me-1"></i> فائل سے ڈیٹا درآمد کریں
                     <input accept=".zip" onchange="loginPageImportFromFile(event)" style="display:none" type="file"/>
 </label>
@@ -7654,41 +7721,52 @@
                 }
             }
             async function exportData() {
-                showToast('info', 'ZIP فائل تیار ہو رہی ہے...');
+                showAppLoader('ڈیٹا ایکسپورٹ', 'ZIP فائل تیار ہو رہی ہے...', 20);
                 try {
                     const data = {};
                     for (const store of STORES) { data[store] = await dbGetAll(store); }
+                    updateAppLoader('ZIP میں کمپریس ہو رہا ہے...', 60);
                     const zip = new JSZip();
                     zip.file("madrasa_database.json", JSON.stringify(data));
                     const content = await zip.generateAsync({ type: "blob", compression: "DEFLATE", compressionOptions: { level: 9 } });
+                    updateAppLoader('تیار!', 100);
                     const a = document.createElement('a');
                     a.href = URL.createObjectURL(content);
                     a.download = 'madrasa_backup_' + today() + '.zip';
                     a.click();
-                    showToast('success', 'ڈیٹا (ZIP) ایکسپورٹ ہو گیا');
-                } catch (err) { showToast('error', 'خرابی: ' + err.message); }
+                    setTimeout(() => {
+                        hideAppLoader();
+                        showToast('success', 'ڈیٹا (ZIP) ایکسپورٹ ہو گیا');
+                    }, 300);
+                } catch (err) { hideAppLoader(); showToast('error', 'خرابی: ' + err.message); }
             }
             async function importData(event) {
                 const file = event.target.files[0];
                 if (!file) return;
                 Swal.fire({ title: 'ڈیٹا درآمد کریں؟', text: 'موجودہ تمام ڈیٹا مٹ جائے گا۔ کیا آپ یقین سے کرنا چاہتے ہیں؟', icon: 'warning', showCancelButton: true, confirmButtonText: 'ہاں، درآمد کریں', cancelButtonText: 'منسوخ', confirmButtonColor: '#c0392b' }).then(async r => {
                     if (!r.isConfirmed) return;
+                    showAppLoader('ڈیٹا درآمد', 'ZIP فائل پڑھی جا رہی ہے...', 15);
                     try {
-                        showToast('info', 'ڈیٹا نکالا جا رہا ہے...');
                         const zip = await JSZip.loadAsync(file);
                         const jsonFile = zip.file("madrasa_database.json");
                         if (!jsonFile) throw new Error("ZIP میں database.json نہیں ملا");
+                        updateAppLoader('ڈیٹا نکالا جا رہا ہے...', 45);
                         const text = await jsonFile.async("string");
                         const data = JSON.parse(text);
+                        updateAppLoader('ڈیٹا بیس میں درآمد ہو رہا ہے...', 70);
+                        for (const store of STORES) { await dbClear(store); }
                         for (const store of STORES) {
                             if (data[store]) {
-                                await dbClear(store);
                                 for (const record of data[store]) { const rec = { ...record }; delete rec.id; await dbAdd(store, rec); }
                             }
                         }
-                        showToast('success', 'ڈیٹا درآمد ہو گیا');
+                        updateAppLoader('کامیاب!', 100);
+                        setTimeout(() => {
+                            hideAppLoader();
+                            showToast('success', 'ڈیٹا درآمد ہو گیا');
+                        }, 400);
                         await loadAppData();
-                    } catch (err) { showToast('error', 'فائل درست نہیں: ' + err.message); }
+                    } catch (err) { hideAppLoader(); showToast('error', 'فائل درست نہیں: ' + err.message); }
                     event.target.value = '';
                 });
             }
@@ -8713,36 +8791,91 @@
                 }
                 return true;
             }
+            let gdTokenObtainedAt = 0;
+            let gdAuthInProgress = false;
+            const TOKEN_EXPIRY_MS = 3000000; // 50 minutes
             function gdRequestToken() {
                 return new Promise((resolve, reject) => {
-                    if (gdAccessToken) { resolve(gdAccessToken); return; }
                     if (!initGoogleAuth()) { reject(new Error('Google Auth init failed')); return; }
+                    // Try to restore token from localStorage
+                    if (!gdAccessToken) {
+                        const savedToken = localStorage.getItem('gdAccessToken');
+                        const savedExpiry = parseInt(localStorage.getItem('gdTokenExpiry') || '0');
+                        if (savedToken && Date.now() < savedExpiry) {
+                            gdAccessToken = savedToken;
+                            gdTokenObtainedAt = savedExpiry - TOKEN_EXPIRY_MS;
+                        }
+                    }
+                    // If we have a recent token, return it immediately
+                    if (gdAccessToken && (Date.now() - gdTokenObtainedAt) < TOKEN_EXPIRY_MS) {
+                        resolve(gdAccessToken);
+                        return;
+                    }
+                    // If a token request is already in flight, wait for it
+                    if (gdAuthInProgress) {
+                        let waited = 0;
+                        const retry = setInterval(() => {
+                            waited += 200;
+                            if (!gdAuthInProgress || waited > 120000) {
+                                clearInterval(retry);
+                                if (gdAccessToken) resolve(gdAccessToken);
+                                else reject(new Error('auth_failed'));
+                            }
+                        }, 200);
+                        return;
+                    }
+                    gdAuthInProgress = true;
+                    const trySilent = !!(gdAccessToken || localStorage.getItem('gdEmail'));
                     tokenClient.callback = (resp) => {
-                        if (resp.error) { reject(new Error(resp.error)); return; }
+                        gdAuthInProgress = false;
+                        if (resp.error) {
+                            if (trySilent) {
+                                // Silent failed — try with consent once
+                                gdAccessToken = null;
+                                gdAuthInProgress = true;
+                                tokenClient.callback = (resp2) => {
+                                    gdAuthInProgress = false;
+                                    if (resp2.error) { reject(new Error(resp2.error)); return; }
+                                    gdAccessToken = resp2.access_token;
+                                    gdTokenObtainedAt = Date.now();
+                                    localStorage.setItem('gdAccessToken', gdAccessToken);
+                                    localStorage.setItem('gdTokenExpiry', (Date.now() + TOKEN_EXPIRY_MS).toString());
+                                    resolve(gdAccessToken);
+                                };
+                                tokenClient.requestAccessToken({ prompt: 'consent' });
+                                return;
+                            }
+                            reject(new Error(resp.error));
+                            return;
+                        }
                         gdAccessToken = resp.access_token;
+                        gdTokenObtainedAt = Date.now();
+                        localStorage.setItem('gdAccessToken', gdAccessToken);
+                        localStorage.setItem('gdTokenExpiry', (Date.now() + TOKEN_EXPIRY_MS).toString());
                         fetch('https://www.googleapis.com/oauth2/v2/userinfo', {
                             headers: { Authorization: 'Bearer ' + gdAccessToken }
                         }).then(r => r.json()).then(info => {
                             gdUpdateConnectionUI(true, info.email || '');
                             localStorage.setItem('gdEmail', info.email || '');
                         }).catch(() => gdUpdateConnectionUI(true, ''));
+                        loginPageUpdateButtons();
                         resolve(gdAccessToken);
                     };
-                    tokenClient.requestAccessToken({ prompt: gdAccessToken ? '' : 'consent' });
+                    tokenClient.requestAccessToken({ prompt: trySilent ? '' : 'consent' });
                 });
             }
             async function authAndSyncToDrive() {
                 if (gdBusy) return;
                 try {
                     gdSetButtons(true);
-                    gdSetProgress(true, 'گوگل سے رابطہ قائم ہو رہا ہے...', 10);
+                    showAppLoader('گوگل ڈرائیو بیک اپ', 'گوگل سے رابطہ قائم ہو رہا ہے...', 5);
                     const token = await gdRequestToken();
                     await syncDataToDrive(token);
                 } catch (err) {
+                    hideAppLoader();
                     if (err.message !== 'Google Auth init failed') {
                         showToast('error', 'گوگل لاگ ان ناکام: ' + err.message);
                     }
-                    gdSetProgress(false);
                     gdSetButtons(false);
                 }
             }
@@ -8750,28 +8883,28 @@
                 if (gdBusy) return;
                 try {
                     gdSetButtons(true);
-                    gdSetProgress(true, 'گوگل سے رابطہ قائم ہو رہا ہے...', 10);
+                    showAppLoader('گوگل ڈرائیو بحالی', 'گوگل سے رابطہ قائم ہو رہا ہے...', 5);
                     const token = await gdRequestToken();
                     await restoreDataFromDrive(token);
                 } catch (err) {
+                    hideAppLoader();
                     if (err.message !== 'Google Auth init failed') {
                         showToast('error', 'گوگل لاگ ان ناکام: ' + err.message);
                     }
-                    gdSetProgress(false);
                     gdSetButtons(false);
                 }
             }
             async function syncDataToDrive(token) {
                 try {
-                    gdSetProgress(true, 'ڈیٹا بیس سے ڈیٹا نکالا جا رہا ہے...', 20);
+                    showAppLoader('گوگل ڈرائیو بیک اپ', 'ڈیٹا بیس سے ڈیٹا نکالا جا رہا ہے...', 10);
                     const data = {};
                     for (const store of STORES) { data[store] = await dbGetAll(store); }
                     data._meta = { exportDate: new Date().toISOString(), appVersion: '2.0', stores: STORES.length };
-                    gdSetProgress(true, 'ZIP فائل تیار ہو رہی ہے...', 40);
+                    updateAppLoader('ZIP فائل تیار ہو رہی ہے...', 30);
                     const zip = new JSZip();
                     zip.file("madrasa_database.json", JSON.stringify(data));
                     const zipBlob = await zip.generateAsync({ type: "blob", compression: "DEFLATE", compressionOptions: { level: 9 } });
-                    gdSetProgress(true, 'گوگل ڈرائیو پر تلاش جاری ہے...', 55);
+                    updateAppLoader('گوگل ڈرائیو پر تلاش جاری ہے...', 50);
                     const searchRes = await fetch('https://www.googleapis.com/drive/v3/files?spaces=appDataFolder&q=name%3D%22' + BACKUP_FILENAME + '%22&fields=files(id,name,modifiedTime,size)', {
                         headers: { Authorization: 'Bearer ' + token }
                     });
@@ -8780,7 +8913,7 @@
                         throw new Error(errData.error?.message || 'Drive search failed: ' + searchRes.status);
                     }
                     const searchData = await searchRes.json();
-                    gdSetProgress(true, 'اپ لوڈ ہو رہا ہے...', 70);
+                    updateAppLoader('اپ لوڈ ہو رہا ہے...', 70);
                     let uploadUrl, method;
                     if (searchData.files && searchData.files.length > 0) {
                         uploadUrl = 'https://www.googleapis.com/upload/drive/v3/files/' + searchData.files[0].id + '?uploadType=multipart&fields=id,name,modifiedTime,size';
@@ -8799,36 +8932,36 @@
                         throw new Error(errData.error?.message || 'Upload failed: ' + upRes.status);
                     }
                     const upData = await upRes.json();
-                    gdSetProgress(true, 'کامیاب!', 100);
+                    updateAppLoader('کامیاب!', 100);
                     gdShowBackupInfo(upData.modifiedTime, upData.size || zipBlob.size);
                     localStorage.setItem('gdLastBackup', JSON.stringify({ time: upData.modifiedTime, size: upData.size || zipBlob.size }));
                     setTimeout(() => {
-                        gdSetProgress(false);
+                        hideAppLoader();
                         gdSetButtons(false);
                         showToast('success', 'گوگل ڈرائیو پر بیک اپ کامیابی سے محفوظ ہو گیا!');
                     }, 800);
                 } catch (err) {
-                    gdSetProgress(false);
+                    hideAppLoader();
                     gdSetButtons(false);
                     showToast('error', 'بیک اپ ناکام: ' + err.message);
                 }
             }
             async function restoreDataFromDrive(token) {
                 try {
-                    gdSetProgress(true, 'گوگل ڈرائیو پر بیک اپ تلاش ہو رہا ہے...', 20);
+                    showAppLoader('گوگل ڈرائیو بحالی', 'بیک اپ تلاش ہو رہا ہے...', 10);
                     const searchRes = await fetch('https://www.googleapis.com/drive/v3/files?spaces=appDataFolder&q=name%3D%22' + BACKUP_FILENAME + '%22&fields=files(id,name,modifiedTime,size)', {
                         headers: { Authorization: 'Bearer ' + token }
                     });
                     if (!searchRes.ok) throw new Error('Drive search failed');
                     const searchData = await searchRes.json();
                     if (!searchData.files || searchData.files.length === 0) {
-                        gdSetProgress(false);
+                        hideAppLoader();
                         gdSetButtons(false);
                         showToast('warning', 'گوگل ڈرائیو پر کوئی بیک اپ نہیں ملا۔ پہلے بیک اپ محفوظ کریں۔');
                         return;
                     }
                     const fileInfo = searchData.files[0];
-                    gdSetProgress(false);
+                    hideAppLoader();
                     gdSetButtons(false);
                     const backupDate = new Date(fileInfo.modifiedTime);
                     const sizeKB = (parseInt(fileInfo.size || 0) / 1024).toFixed(1);
@@ -8845,39 +8978,39 @@
                         confirmButtonColor: '#1a6b3c'
                     });
                     if (!result.isConfirmed) return;
+                    showAppLoader('گوگل ڈرائیو بحالی', 'فائل ڈاؤن لوڈ ہو رہی ہے...', 20);
                     gdSetButtons(true);
-                    gdSetProgress(true, 'فائل ڈاؤن لوڈ ہو رہی ہے...', 30);
                     const fileRes = await fetch('https://www.googleapis.com/drive/v3/files/' + fileInfo.id + '?alt=media', {
                         headers: { Authorization: 'Bearer ' + token }
                     });
                     if (!fileRes.ok) throw new Error('Download failed');
-                    gdSetProgress(true, 'ZIP سے ڈیٹا نکالا جا رہا ہے...', 55);
+                    updateAppLoader('ZIP سے ڈیٹا نکالا جا رہا ہے...', 45);
                     const blob = await fileRes.blob();
                     const zip = await JSZip.loadAsync(blob);
                     const jsonFile = zip.file("madrasa_database.json");
                     if (!jsonFile) throw new Error("ZIP میں madrasa_database.json نہیں ملا");
-                    gdSetProgress(true, 'ڈیٹا بیس میں درآمد ہو رہا ہے...', 70);
+                    updateAppLoader('ڈیٹا بیس میں درآمد ہو رہا ہے...', 70);
                     const text = await jsonFile.async("string");
                     const data = JSON.parse(text);
                     let restored = 0;
+                    for (const store of STORES) { await dbClear(store); }
                     for (const store of STORES) {
                         if (data[store]) {
-                            await dbClear(store);
                             for (const record of data[store]) { const rec = { ...record }; delete rec.id; await dbAdd(store, rec); }
                             restored++;
                         }
                     }
-                    gdSetProgress(true, 'کامیاب! ایپ لوڈ ہو رہی ہے...', 100);
+                    updateAppLoader('کامیاب! ایپ لوڈ ہو رہی ہے...', 100);
                     gdShowBackupInfo(fileInfo.modifiedTime, fileInfo.size);
                     localStorage.setItem('gdLastBackup', JSON.stringify({ time: fileInfo.modifiedTime, size: fileInfo.size }));
                     setTimeout(async () => {
-                        gdSetProgress(false);
+                        hideAppLoader();
                         gdSetButtons(false);
                         showToast('success', restored + ' اسٹورز کا ڈیٹا کامیابی سے بحال ہو گیا!');
                         await loadAppData();
                     }, 800);
                 } catch (err) {
-                    gdSetProgress(false);
+                    hideAppLoader();
                     gdSetButtons(false);
                     showToast('error', 'بحالی ناکام: ' + err.message);
                 }
@@ -8898,6 +9031,8 @@
                         gdAccessToken = null;
                         tokenClient = null;
                         localStorage.removeItem('gdEmail');
+                        localStorage.removeItem('gdAccessToken');
+                        localStorage.removeItem('gdTokenExpiry');
                         gdUpdateConnectionUI(false);
                         showToast('success', 'گوگل اکاؤنٹ سے رابطہ منقطع ہو گیا');
                     }
@@ -8919,9 +9054,9 @@
             async function gdConnectOnly() {
                 if (gdBusy) return;
                 try {
-                    gdSetProgress(true, 'گوگل سے رابطہ قائم ہو رہا ہے...', 30);
+                    showAppLoader('گوگل سے رابطہ', 'رابطہ قائم ہو رہا ہے...', 20);
                     const token = await gdRequestToken();
-                    gdSetProgress(true, 'بیک اپ کی معلومات حاصل ہو رہی ہیں...', 70);
+                    updateAppLoader('بیک اپ کی معلومات حاصل ہو رہی ہیں...', 60);
                     const searchRes = await fetch('https://www.googleapis.com/drive/v3/files?spaces=appDataFolder&q=name%3D%22' + BACKUP_FILENAME + '%22&fields=files(id,name,modifiedTime,size)', {
                         headers: { Authorization: 'Bearer ' + token }
                     });
@@ -8933,10 +9068,10 @@
                             localStorage.setItem('gdLastBackup', JSON.stringify({ time: f.modifiedTime, size: f.size }));
                         }
                     }
-                    gdSetProgress(false);
+                    hideAppLoader();
                     showToast('success', 'گوگل ڈرائیو سے رابطہ قائم ہو گیا!');
                 } catch (err) {
-                    gdSetProgress(false);
+                    hideAppLoader();
                     if (err.message !== 'Google Auth init failed') {
                         showToast('error', 'رابطہ ناکام: ' + err.message);
                     }
@@ -8954,16 +9089,16 @@
                 if (!res.isConfirmed) return;
                 try {
                     gdSetButtons(true);
-                    gdSetProgress(true, 'گوگل سے رابطہ قائم ہو رہا ہے...', 10);
+                    showAppLoader('تازہ بیک اپ', 'گوگل سے رابطہ قائم ہو رہا ہے...', 5);
                     const token = await gdRequestToken();
-                    gdSetProgress(true, 'پرانا بیک اپ تلاش ہو رہا ہے...', 25);
+                    updateAppLoader('پرانا بیک اپ تلاش ہو رہا ہے...', 20);
                     const searchRes = await fetch('https://www.googleapis.com/drive/v3/files?spaces=appDataFolder&q=name%3D%22' + BACKUP_FILENAME + '%22&fields=files(id)', {
                         headers: { Authorization: 'Bearer ' + token }
                     });
                     if (searchRes.ok) {
                         const searchData = await searchRes.json();
                         if (searchData.files && searchData.files.length > 0) {
-                            gdSetProgress(true, 'پرانا بیک اپ حذف ہو رہا ہے...', 40);
+                            updateAppLoader('پرانا بیک اپ حذف ہو رہا ہے...', 35);
                             for (const f of searchData.files) {
                                 await fetch('https://www.googleapis.com/drive/v3/files/' + f.id, {
                                     method: 'DELETE', headers: { Authorization: 'Bearer ' + token }
@@ -8971,10 +9106,10 @@
                             }
                         }
                     }
-                    gdSetProgress(true, 'نیا بیک اپ تیار ہو رہا ہے...', 55);
+                    updateAppLoader('نیا بیک اپ تیار ہو رہا ہے...', 50);
                     await syncDataToDrive(token);
                 } catch (err) {
-                    gdSetProgress(false);
+                    hideAppLoader();
                     gdSetButtons(false);
                     showToast('error', 'ناکام: ' + err.message);
                 }
@@ -9385,12 +9520,9 @@
                 if (!autoSyncEnabled) return { synced: false, reason: 'auto_sync_disabled' };
                 if (!navigator.onLine) { updateSyncStatus('offline', 'آف لائن'); return { synced: false, reason: 'offline' }; }
                 if (syncInProgress) return { synced: false, reason: 'in_progress' };
-                if (!gdAccessToken) {
-                    try {
-                        if (!initGoogleAuth()) return { synced: false, reason: 'no_auth' };
-                        await gdRequestToken();
-                    } catch (e) { return { synced: false, reason: 'auth_failed' }; }
-                }
+                try {
+                    await gdRequestToken();
+                } catch (e) { return { synced: false, reason: 'auth_failed' }; }
                 syncInProgress = true;
                 updateSyncStatus('syncing', 'مطابقت ہو رہی ہے...');
                 try {
@@ -9462,18 +9594,20 @@
                 if (!navigator.onLine) { showToast('error', 'آپ آف لائن ہیں'); return; }
                 const btn = document.querySelector('[onclick="manualSync()"]');
                 if (btn) { btn.disabled = true; btn.innerHTML = '<i class="fa fa-sync fa-spin"></i> مطابقت...'; }
+                showAppLoader('ڈیٹا مطابقت', 'مطابقت شروع ہو رہی ہے...', 5);
                 try {
-                    if (!gdAccessToken) {
-                        if (!initGoogleAuth()) { showToast('error', 'Google Auth init failed'); if (btn) { btn.disabled = false; btn.innerHTML = '<i class="fa fa-sync"></i> دستی مطابقت'; } return; }
-                        await gdRequestToken();
-                    }
                     const result = await syncNow();
-                    if (result.synced) {
-                        showToast('success', result.merged ? 'مطابقت کامیاب! نئے ڈیٹا ضم ہو گئے' : 'مطابقت کامیاب! ڈیٹا تازہ ترین ہے');
-                    } else {
-                        showToast('warning', 'مطابقت نہیں ہو سکی: ' + (result.reason || 'unknown'));
-                    }
+                    updateAppLoader('مکمل!', 100);
+                    setTimeout(() => {
+                        hideAppLoader();
+                        if (result.synced) {
+                            showToast('success', result.merged ? 'مطابقت کامیاب! نئے ڈیٹا ضم ہو گئے' : 'مطابقت کامیاب! ڈیٹا تازہ ترین ہے');
+                        } else {
+                            showToast('warning', 'مطابقت نہیں ہو سکی: ' + (result.reason || 'unknown'));
+                        }
+                    }, 400);
                 } catch (err) {
+                    hideAppLoader();
                     showToast('error', 'مطابقت ناکام: ' + err.message);
                 }
                 if (btn) { btn.disabled = false; btn.innerHTML = '<i class="fa fa-sync"></i> دستی مطابقت'; }
@@ -9624,9 +9758,12 @@
             }
             async function loginPageImportAllStores(data) {
                 for (const store of STORES) {
-                    if (data[store]) {
-                        await dbClear(store);
-                        for (const record of data[store]) {
+                    await dbClear(store);
+                }
+                for (const store of STORES) {
+                    const records = data[store];
+                    if (records && records.length) {
+                        for (const record of records) {
                             const rec = { ...record };
                             delete rec.id;
                             await dbAdd(store, rec);
@@ -9634,36 +9771,48 @@
                     }
                 }
             }
+            // ─── Global Overlay Loader ───
+            function showAppLoader(title, text, pct) {
+                const el = document.getElementById('appOverlayLoader');
+                if (!el) return;
+                el.classList.add('active');
+                const t = document.getElementById('appLoaderTitle');
+                const b = document.getElementById('appLoaderText');
+                const p = document.getElementById('appLoaderBar');
+                const pc = document.getElementById('appLoaderPercent');
+                if (title) t.textContent = title;
+                if (text) b.textContent = text;
+                if (typeof pct === 'number') { p.style.width = pct + '%'; pc.textContent = pct + '%'; }
+            }
+            function updateAppLoader(text, pct) {
+                const el = document.getElementById('appOverlayLoader');
+                if (!el || !el.classList.contains('active')) return;
+                if (text) document.getElementById('appLoaderText').textContent = text;
+                if (typeof pct === 'number') {
+                    document.getElementById('appLoaderBar').style.width = pct + '%';
+                    document.getElementById('appLoaderPercent').textContent = pct + '%';
+                }
+            }
+            function hideAppLoader() {
+                const el = document.getElementById('appOverlayLoader');
+                if (!el) return;
+                el.classList.remove('active');
+            }
             async function loginPageSyncFromDrive() {
                 if (!navigator.onLine) { Swal.fire({ icon: 'error', title: 'آف لائن', text: 'آپ آف لائن ہیں۔ انٹرنیٹ کنیکشن درکار ہے۔' }); return; }
-                loginPageShowProgress(true, 'گوگل سے رابطہ قائم ہو رہا ہے...', 10);
+                showAppLoader('گوگل ڈرائیو مطابقت', 'گوگل سے تصدیق ہو رہی ہے...', 5);
                 try {
-                    if (!initGoogleAuth()) { loginPageShowProgress(false); return; }
-                    const token = await (async () => {
-                        return new Promise((resolve, reject) => {
-                            if (gdAccessToken) { resolve(gdAccessToken); return; }
-                            const tc = google.accounts.oauth2.initTokenClient({
-                                client_id: CLIENT_ID,
-                                scope: SCOPES,
-                                callback: (resp) => {
-                                    if (resp.error) { reject(new Error(resp.error)); return; }
-                                    gdAccessToken = resp.access_token;
-                                    resolve(gdAccessToken);
-                                }
-                            });
-                            tc.requestAccessToken({ prompt: 'consent' });
-                        });
-                    })();
-                    loginPageShowProgress(true, 'Drive سے ڈیٹا ڈاؤن لوڈ ہو رہا ہے...', 40);
+                    const token = await gdRequestToken();
+                    updateAppLoader('Drive سے ڈیٹا ڈاؤن لوڈ ہو رہا ہے...', 30);
                     const remote = await readDriveJSON(token, SYNC_DATA_FILENAME);
                     if (!remote) {
-                        loginPageShowProgress(false);
+                        hideAppLoader();
                         Swal.fire({ icon: 'warning', title: 'کوئی ڈیٹا نہیں', text: 'گوگل ڈرائیو پر اس ایپ کا کوئی ڈیٹا نہیں ملا۔ پہلے ایڈمن سے ڈیٹا Drive پر محفوظ کروائیں۔' });
                         return;
                     }
-                    loginPageShowProgress(true, 'ڈیٹا درآمد ہو رہا ہے...', 70);
+                    updateAppLoader('ڈیٹا درآمد ہو رہا ہے...', 60);
                     await loginPageImportAllStores(remote.data);
-                    // Also get images if available
+                    updateAppLoader('تصاویر مطابقت ہو رہی ہیں...', 80);
                     const remoteImgs = await readDriveJSON(token, SYNC_IMAGES_FILENAME);
                     if (remoteImgs) {
                         for (const store of SYNC_STORES) {
@@ -9683,17 +9832,19 @@
                             }
                         }
                     }
-                    loginPageShowProgress(true, 'کامیاب! ڈیٹا لوڈ ہو رہا ہے...', 100);
-                    localStorage.setItem('gdEmail', token.email || '');
-                    gdUpdateConnectionUI(true, token.email || '');
+                    updateAppLoader('کامیاب! ڈیٹا لوڈ ہو رہا ہے...', 100);
+                    const gdEmail = localStorage.getItem('gdEmail') || '';
+                    gdUpdateConnectionUI(true, gdEmail);
+                    loginPageUpdateButtons();
                     setTimeout(() => {
-                        loginPageShowProgress(false);
+                        hideAppLoader();
                         Swal.fire({ icon: 'success', title: 'ڈیٹا کامیابی سے حاصل ہو گیا', text: 'اب آپ اپنے صارف نام اور پاس ورڈ سے لاگ ان کر سکتے ہیں', confirmButtonColor: '#1a6b3c' }).then(() => {
                             location.reload();
                         });
                     }, 600);
                 } catch (err) {
-                    loginPageShowProgress(false);
+                    hideAppLoader();
+                    loginPageUpdateButtons();
                     Swal.fire({ icon: 'error', title: 'خرابی', text: 'ڈیٹا حاصل کرنے میں ناکامی: ' + (err.message || 'نامعلوم') });
                 }
             }
@@ -9702,30 +9853,68 @@
                 if (!file) return;
                 Swal.fire({ title: 'فائل سے ڈیٹا درآمد کریں؟', text: 'موجودہ تمام ڈیفالٹ ڈیٹا تبدیل ہو جائے گا اور آپ درآمد شدہ صارفین سے لاگ ان کر سکیں گے', icon: 'warning', showCancelButton: true, confirmButtonText: 'ہاں، درآمد کریں', cancelButtonText: 'منسوخ', confirmButtonColor: '#1a6b3c' }).then(async r => {
                     if (!r.isConfirmed) { event.target.value = ''; return; }
-                    loginPageShowProgress(true, 'ZIP فائل پڑھی جا رہی ہے...', 20);
+                    showAppLoader('فائل سے درآمد', 'ZIP فائل پڑھی جا رہی ہے...', 10);
                     try {
                         const zip = await JSZip.loadAsync(file);
                         const jsonFile = zip.file("madrasa_database.json");
                         if (!jsonFile) throw new Error("ZIP میں madrasa_database.json نہیں ملا");
-                        loginPageShowProgress(true, 'ڈیٹا نکالا جا رہا ہے...', 50);
+                        updateAppLoader('ڈیٹا نکالا جا رہا ہے...', 40);
                         const text = await jsonFile.async("string");
                         const data = JSON.parse(text);
-                        loginPageShowProgress(true, 'ڈیٹا بیس میں درآمد ہو رہا ہے...', 70);
+                        updateAppLoader('ڈیٹا بیس میں درآمد ہو رہا ہے...', 70);
                         await loginPageImportAllStores(data);
-                        loginPageShowProgress(true, 'کامیاب!', 100);
+                        updateAppLoader('کامیاب!', 100);
                         setTimeout(() => {
-                            loginPageShowProgress(false);
+                            hideAppLoader();
                             Swal.fire({ icon: 'success', title: 'ڈیٹا کامیابی سے درآمد ہو گیا', text: 'اب آپ اپنے صارف نام اور پاس ورڈ سے لاگ ان کر سکتے ہیں', confirmButtonColor: '#1a6b3c' }).then(() => {
                                 location.reload();
                             });
                         }, 600);
                     } catch (err) {
-                        loginPageShowProgress(false);
+                        hideAppLoader();
                         Swal.fire({ icon: 'error', title: 'خرابی', text: 'فائل درست نہیں: ' + err.message });
                     }
                     event.target.value = '';
                 });
             }
+
+            // ─── Login Page Connection-Aware Buttons ───
+            function loginPageUpdateButtons() {
+                const connected = !!gdAccessToken;
+                const driveBtn = document.getElementById('loginDriveBtn');
+                const syncBtn = document.getElementById('loginSyncBtn');
+                const importLabel = document.getElementById('loginImportLabel');
+                if (driveBtn) driveBtn.style.display = connected ? 'none' : 'inline-flex';
+                if (syncBtn) syncBtn.style.display = connected ? 'inline-flex' : 'none';
+                if (importLabel) importLabel.style.display = connected ? 'none' : 'inline-flex';
+            }
+            async function loginPageSyncBeforeLogin() {
+                if (!navigator.onLine) { Swal.fire({ icon: 'error', title: 'آف لائن', text: 'آپ آف لائن ہیں۔ انٹرنیٹ کنیکشن درکار ہے۔' }); return; }
+                showAppLoader('لاگ ان سے پہلے مطابقت', 'گوگل سے تصدیق ہو رہی ہے...', 5);
+                try {
+                    await gdRequestToken();
+                    updateAppLoader('دور سے ڈیٹا ڈاؤن لوڈ ہو رہا ہے...', 30);
+                    const pullResult = await pullFromDrive(gdAccessToken);
+                    updateAppLoader('مقامی ڈیٹا مطابقت ہو رہا ہے...', 60);
+                    const pushOk = await pushToDrive(gdAccessToken);
+                    if (pushOk) {
+                        lastSyncTime = Date.now();
+                    }
+                    updateAppLoader('مکمل! ڈیٹا تازہ ترین ہے', 100);
+                    await populateAllSelects();
+                    setTimeout(() => {
+                        hideAppLoader();
+                        const msg = pullResult.merged ? 'نئے ڈیٹا ضم ہو گئے' : 'ڈیٹا پہلے سے تازہ ترین ہے';
+                        Swal.fire({ icon: 'success', title: 'مطابقت کامیاب', text: msg, confirmButtonColor: '#1a6b3c' });
+                    }, 500);
+                } catch (err) {
+                    hideAppLoader();
+                    Swal.fire({ icon: 'error', title: 'خرابی', text: 'مطابقت ناکام: ' + (err.message || 'نامعلوم') });
+                }
+            }
+
+            // Ensure login buttons show correct state on page load
+            try { loginPageUpdateButtons(); } catch (e) {}
 
             // Load autoSync setting
             (function initSyncSettings() {
@@ -9746,7 +9935,25 @@
 
             // Start presence after login
             document.addEventListener('DOMContentLoaded', () => {
-                // Defer start until after login
+                // Auto-restore Google Drive connection from previous session
+                (function tryRestoreGdConnection() {
+                    try {
+                        const savedEmail = localStorage.getItem('gdEmail');
+                        const savedToken = localStorage.getItem('gdAccessToken');
+                        const savedExpiry = parseInt(localStorage.getItem('gdTokenExpiry') || '0');
+                        if (savedToken && Date.now() < savedExpiry && navigator.onLine) {
+                            gdAccessToken = savedToken;
+                            gdTokenObtainedAt = savedExpiry - TOKEN_EXPIRY_MS;
+                            if (savedEmail) {
+                                gdUpdateConnectionUI(true, savedEmail);
+                            } else {
+                                gdUpdateConnectionUI(true, '');
+                            }
+                        }
+                        loginPageUpdateButtons();
+                    } catch (e) { console.warn('Auto-restore GD connection:', e); }
+                })();
+                // Defer presence start until after login
                 const checkInterval = setInterval(() => {
                     if (currentUser && gdAccessToken) {
                         clearInterval(checkInterval);
@@ -9762,6 +9969,15 @@
 <script src="./hifz.js"></script>
 <script src="./hifz2.js"></script>
 <script src="./hifz3.js"></script>
+</div>
+<div class="app-overlay-loader" id="appOverlayLoader">
+<div class="loader-card">
+<div class="loader-icon" id="appLoaderIcon"><i class="fa fa-cloud-upload-alt fa-fade"></i></div>
+<div class="loader-title" id="appLoaderTitle">براہ کرم انتظار کریں</div>
+<div class="loader-text" id="appLoaderText">جاری ہے...</div>
+<div class="loader-progress-track"><div class="loader-progress-bar" id="appLoaderBar"></div></div>
+<div class="loader-percent" id="appLoaderPercent">0%</div>
+</div>
 </div>
 <script src="./pwa-register.js" type="module"></script></body>
 </html>

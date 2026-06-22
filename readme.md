@@ -2106,4 +2106,63 @@ Mass Promotion → Class Updates → Fee Structure Change → All Modules
 
 ---
 
+---
+
+## 🆕 Recently Added Features & Updates
+
+### 📥 Pre‑Login Data Management (لاگ ان سے پہلے ڈیٹا مینجمنٹ)
+New options on the login page before signing in:
+| Feature | English | اردو |
+|---------|---------|------|
+| **Restore from Google Drive** | Download backup from Drive before login | گوگل ڈرائیو سے ڈیٹا حاصل کریں |
+| **Import from File** | Upload ZIP export before logging in | فائل سے ڈیٹا درآمد کریں |
+| **Sync Before Login** | Fetch latest Drive backup then log in | لاگ ان سے پہلے مطابقت کریں |
+
+### 🧾 Quick Receipt Generator (فوری رسید جنریٹر)
+Generate receipts for non‑student payments (walk‑in donations, book sales, etc.).
+- Fields: Name, Purpose, Amount, Date, Receipt Number (auto or manual)
+- Print instantly from Fee Collection page
+
+### 👥 Active Users Panel (فعال صارفین)
+Sidebar shows real‑time active user count and user list. Helps monitor who is currently using the system (multi‑tab support).
+
+### 🔄 Sync Status Bar (سنک اسٹیٹس بار)
+Status indicator at the bottom of the sidebar showing whether data is synced. Click to trigger manual sync.
+
+### 📚 Library Enhanced (کتب خانہ میں بہتری)
+- **Books Catalog**: Separate management for book inventory (name, author, total, available)
+- **Issue/Return**: Separate tracking for lending transactions
+- Stock auto‑updates from Inventory module when books are issued/returned
+
+### 🛏️ Hostel Enhanced (دارالاقامہ میں بہتری)
+- **Rooms Catalog**: Separate room management (room number, capacity)
+- **Capacity Validation**: Cannot allocate more than capacity (configurable in settings)
+- **Residents**: Separate table for allocations
+
+### 🏅 Donors Management (ڈونرز مینجمنٹ)
+- Separate donors catalog with name and contact
+- View all donations by a specific donor
+- Quick add donation for existing donors
+
+### 📚 Academic Year Management (تعلیمی سال)
+- Create and manage academic years
+- End‑of‑year promotion wizard: select source class → target class → apply
+- Archive student promotion records
+- Undo last promotion within 30 days
+
+### 🆔 Combined Documents Page (مشترکہ دستاویزات)
+Unified page for generating all official documents:
+- Student ID Card
+- Teacher ID Card
+- Leaving Certificate (اسکول چھوڑنے کا سرٹیفکیٹ)
+- Sanad / Completion Certificate (سند تکمیل)
+- Character Certificate (کردار کا سرٹیفکیٹ)
+
+### 👤 Sidebar Enhancements
+- Active users display at bottom of sidebar
+- Sync status bar with manual sync click
+- Modernized sidebar with data‑tooltip for collapsed mode
+
+---
+
 > ✅ *This comprehensive report reflects all features, modules, and functionalities implemented in the Madrasa Management System by Bannu Software Solutions. All features are production-ready, fully tested, and optimized for Islamic educational institutions.* 🕌✨

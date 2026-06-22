@@ -550,5 +550,48 @@ This project is open source under the **MIT License**. You are free to use, modi
 
 ---
 
-**© 2025 Bannu Software Solutions – All Rights Reserved**  
+---
+
+## 🆕 Recently Added Features & Updates
+
+### 📥 Pre‑Login Data Management
+New options on the login page before signing in:
+- **Restore from Google Drive** – download backup from Drive before login
+- **Import from File** – upload ZIP export before logging in
+- **Sync Before Login** – fetch latest Drive backup then log in
+
+### 🧾 Quick Receipt Generator
+Generate receipts for non‑student payments (walk‑in donations, book sales, etc.). Access from Fee Collection page.
+
+### 👥 Active Users Panel
+Sidebar displays real‑time active user count and user list (multi‑tab support).
+
+### 🔄 Sync Status Bar
+Status indicator at the bottom of the sidebar. Click to trigger manual sync.
+
+### 📚 Library Enhanced
+- **Books Catalog**: Separate book inventory (name, author, total, available)
+- **Issue/Return**: Separate lending transaction tracking
+- Stock auto‑updates from Inventory
+
+### 🛏️ Hostel Enhanced
+- **Rooms Catalog**: Separate room management (room number, capacity)
+- **Capacity Validation** (configurable max)
+- **Residents**: Separate allocation table
+
+### 🏅 Donors Management
+- Separate donors catalog with donation history
+- Quick donation entry for existing donors
+
+### 📚 Academic Year Management
+- Create/manage academic years
+- End‑of‑year promotion wizard
+- Archive promotion records
+
+### 🆔 Combined Documents Page
+Unified page for: Student ID, Teacher ID, Leaving Certificate, Sanad/Completion, Character Certificate
+
+---
+
+**© 2026 Bannu Software Solutions – All Rights Reserved**  
 *Made with ❤️ for the Ummah*
