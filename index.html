@@ -2629,7 +2629,6 @@
 </nav>
 <div class="sidebar-footer">
 <div>Created by: <strong>Yasin Ullah</strong> – Bannu Software Solutions</div>
-<a href="https://www.yasinbss.com" target="_blank">www.yasinbss.com</a>
 <div>WhatsApp: 03361593533</div>
 </div>
 </div>
@@ -4081,7 +4080,7 @@
 </div>
 <footer style="background:#fff;border-top:1px solid #e5ebe7;padding:.75rem 1.5rem;text-align:center;font-size:.75rem;color:#6b8c72">
                     Created by: <strong>Yasin Ullah</strong> – Bannu Software Solutions |
-                    <a href="https://www.yasinbss.com" rel="noopener" target="_blank">www.yasinbss.com</a> |
+                     |
                     WhatsApp: 03361593533
                 </footer>
 </div>
@@ -6598,7 +6597,7 @@
     <div class="r-row"><span>ادائیگی طریقہ</span><span>${f.method || ''}</span></div>
     <div class="r-row"><span>نوٹ</span><span>${f.note || '—'}</span></div>
     <div class="print-footer" style="margin-top:1rem;text-align:center;font-size:.7rem;color:#666;border-top:1px dashed #ccc;padding-top:.5rem">
-      Created by: Yasin Ullah – Bannu Software Solutions | www.yasinbss.com | 03361593533
+      Created by: Yasin Ullah – Bannu Software Solutions | 03361593533
     </div>
   </div>`;
                 document.getElementById('receiptBody').innerHTML = html;
@@ -6712,7 +6711,7 @@
     <div class="r-row"><span>باقی رقم</span><span>Rs ${(s.balance || 0).toLocaleString()}</span></div>
     <div class="r-row"><span>نوٹ</span><span>${s.note || '—'}</span></div>
     <div class="print-footer" style="margin-top:1rem;text-align:center;font-size:.7rem;color:#666;border-top:1px dashed #ccc;padding-top:.5rem">
-      Created by: Yasin Ullah – Bannu Software Solutions | www.yasinbss.com | 03361593533
+      Created by: Yasin Ullah – Bannu Software Solutions | 03361593533
     </div>
   </div>`;
                 document.getElementById('salSlipBody').innerHTML = html;
@@ -7081,7 +7080,7 @@
     <div class="r-row r-total"><span>گریڈ</span><span>${ex.grade}</span></div>
     <div class="r-row"><span>نتیجہ</span><span style="color:${ex.result === 'پاس' ? 'green' : 'red'}">${ex.result}</span></div>
     <div class="print-footer" style="margin-top:1rem;text-align:center;font-size:.7rem;color:#666;border-top:1px dashed #ccc;padding-top:.5rem">
-      Created by: Yasin Ullah – Bannu Software Solutions | www.yasinbss.com | 03361593533
+      Created by: Yasin Ullah – Bannu Software Solutions | 03361593533
     </div>
   </div>`;
                 document.getElementById('resultCardBody').innerHTML = html;
@@ -7365,7 +7364,7 @@
                     });
                     html = `${printHead}<h6>ڈیفالٹرز رپورٹ - ${curMonth} (${defaulterList.length} طلبا)</h6><div class="table-responsive"><table class="table table-sm table-striped"><thead><tr><th>داخلہ#</th><th>طالب علم</th><th>والد</th><th>جماعت</th><th>رابطہ</th><th>ایمرجنسی</th><th>واجب الادا</th></tr></thead><tbody>${defaulterList.map(s => { const cls = classes.find(c => c.id === s.classId); return `<tr><td>${escapeHtml(s.enrollNo || '')}</td><td>${escapeHtml(s.name)}</td><td>${escapeHtml(s.fatherName || '')}</td><td>${cls ? escapeHtml(cls.name) : '—'}</td><td>${escapeHtml(s.contact || '')}</td><td>${escapeHtml(s.emergencyContact || '')}</td><td>Rs ${(cls ? cls.monthlyFee : 0).toLocaleString()}</td></tr>`; }).join('')}</tbody></table></div>`;
                 }
-                html += `<div style="margin-top:1.5rem;border-top:1px solid #ddd;padding-top:.75rem;text-align:center;font-size:.72rem;color:#6b8c72">Created by: Yasin Ullah – Bannu Software Solutions | <a href="https://www.yasinbss.com" target="_blank">www.yasinbss.com</a> | WhatsApp: 03361593533</div>`;
+                html += `<div style="margin-top:1.5rem;border-top:1px solid #ddd;padding-top:.75rem;text-align:center;font-size:.72rem;color:#6b8c72">Created by: Yasin Ullah – Bannu Software Solutions |  | WhatsApp: 03361593533</div>`;
                 out.innerHTML = html;
             }
             function printReport() {
@@ -8928,6 +8927,5 @@
 <script src="./hifz2.js"></script>
 <script src="./hifz3.js"></script>
 </div>
-
 <script src="./pwa-register.js" type="module"></script></body>
 </html>
