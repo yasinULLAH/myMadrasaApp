@@ -1,4 +1,5 @@
 <!DOCTYPE html>
+
 <html data-theme="light" dir="rtl" lang="ur">
 
 <head>
@@ -2474,6 +2475,10 @@
             z-index: 10040 !important;
         }
 
+        .modal-header .btn-close {
+            margin: -0.5rem auto -0.5rem -0.5rem !important;
+        }
+
         @media (max-width: 768px) {
             .modal-dialog {
                 display: flex;
@@ -2489,6 +2494,13 @@
             .modal-content {
                 max-height: calc(100vh - 70px);
                 margin-bottom: auto;
+                display: flex;
+                flex-direction: column;
+            }
+
+            .modal-body {
+                overflow-y: auto;
+                min-height: 0;
             }
 
             .modal-footer {
@@ -9141,6 +9153,7 @@
         <script src="./hifz2.js"></script>
         <script src="./hifz3.js"></script>
     </div>
+
     <script src="./pwa-register.js" type="module"></script>
 </body>
 
