@@ -8721,6 +8721,8 @@
                 const badge = document.getElementById('gdConnectionBadge');
                 const statusText = document.getElementById('gdSyncStatusText');
                 const disconnectBtn = document.getElementById('gdBtnDisconnect');
+                const connectBtn = document.getElementById('gdBtnConnect');
+                const connectBtnText = document.getElementById('gdBtnConnectText');
                 if (connected) {
                     badge.style.background = 'var(--green-light)';
                     badge.style.color = 'var(--green-dark)';
@@ -8728,6 +8730,8 @@
                     statusText.textContent = email ? ('متصل بحساب: ' + email) : 'گوگل ڈرائیو سے متصل';
                     statusText.style.color = 'var(--green-primary)';
                     if (disconnectBtn) disconnectBtn.style.display = 'inline-flex';
+                    if (connectBtn) { connectBtn.disabled = true; connectBtn.style.opacity = '.5'; }
+                    if (connectBtnText) connectBtnText.textContent = 'متصل';
                 } else {
                     badge.style.background = '#fee';
                     badge.style.color = '#c0392b';
@@ -8735,6 +8739,8 @@
                     statusText.textContent = 'غیر متصل';
                     statusText.style.color = '#888';
                     if (disconnectBtn) disconnectBtn.style.display = 'none';
+                    if (connectBtn) { connectBtn.disabled = false; connectBtn.style.opacity = '1'; }
+                    if (connectBtnText) connectBtnText.textContent = 'رابطہ قائم کریں';
                 }
             }
             function gdShowBackupInfo(modifiedTime, sizeBytes) {
